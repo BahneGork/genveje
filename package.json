@@ -1,0 +1,12 @@
+{
+  "name": "genveje",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Lokal startside med genveje til hjemmesider, SharePoint, filer og mapper – én HTML-fil uden installation",
+  "scripts": {
+    "test": "node tests/app.test.js && node tests/folder.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  }
+}
