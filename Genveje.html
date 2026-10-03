@@ -19,107 +19,186 @@
 * { box-sizing:border-box; }
 html, body { margin:0; height:100%; }
 body { font-family:"Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--text); display:flex; }
-button, input { font:inherit; }
+button, input, select { font:inherit; }
+[hidden] { display:none !important; }
 
 /* ---- Venstremenu ---- */
-nav { width:240px; flex-shrink:0; background:var(--side); color:var(--side-text);
+nav { width:250px; flex-shrink:0; background:var(--side); color:var(--side-text);
       padding:18px 0; overflow-y:auto; height:100vh; display:flex; flex-direction:column; }
 nav h1 { font-size:18px; color:#fff; margin:0 20px 16px; }
 #navItems { flex:1; }
-nav button { display:flex; justify-content:space-between; align-items:center; gap:8px;
-             width:100%; background:none; border:0; border-left:3px solid transparent;
-             color:inherit; text-align:left; padding:8px 20px 8px 17px; cursor:pointer; }
-nav button:hover { background:rgba(255,255,255,.06); color:#fff; }
-nav button.active { color:#fff; border-left-color:var(--accent); background:rgba(0,120,212,.2); }
-nav .count { font-size:12px; opacity:.7; }
-nav hr { border:0; border-top:1px solid rgba(255,255,255,.12); margin:8px 20px; }
-.tools { padding-top:8px; }
-.tools button { font-size:13px; }
-.dot { width:8px; height:8px; border-radius:50%; background:var(--star); display:none; }
+.navbtn, .tools button { display:flex; align-items:center; gap:8px; width:100%; background:none; border:0;
+  border-left:3px solid transparent; color:inherit; text-align:left; padding:8px 18px 8px 17px; cursor:pointer; }
+.navbtn:hover, .tools button:hover { background:rgba(255,255,255,.06); color:#fff; }
+.navbtn.active { color:#fff; border-left-color:var(--accent); background:rgba(0,120,212,.22); }
+.navbtn[style] { box-shadow:inset 3px 0 0 var(--c); }
+.navbtn[style].active { border-left-color:var(--c); }
+.nicon { width:20px; text-align:center; flex-shrink:0; }
+.nlabel { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.count { font-size:12px; opacity:.7; }
+.nedit { opacity:0; font-size:13px; padding:0 4px; border-radius:4px; }
+.navbtn:hover .nedit { opacity:.8; }
+.nedit:hover { opacity:1 !important; background:rgba(255,255,255,.12); }
+.navsec { display:flex; align-items:center; justify-content:space-between; margin:14px 18px 4px 20px;
+  font-size:11px; text-transform:uppercase; letter-spacing:.08em; opacity:.75; }
+.navadd { background:rgba(255,255,255,.08); border:0; color:#fff; border-radius:5px; width:22px; height:22px; cursor:pointer; line-height:1; }
+.navadd:hover { background:var(--accent); }
+.navhint { font-size:12px; opacity:.7; padding:4px 20px; }
+.tools { padding-top:8px; border-top:1px solid rgba(255,255,255,.12); margin-top:10px; }
+.tools button { font-size:13px; padding-top:6px; padding-bottom:6px; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--star); display:none; margin-left:auto; }
 .dot.on { display:inline-block; }
 
 /* ---- Hovedområde ---- */
-main { flex:1; padding:20px 28px; overflow-y:auto; height:100vh; }
-.top { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
-#search { flex:1; padding:10px 14px; font-size:16px; border:1px solid var(--border);
+main { flex:1; padding:20px 28px; overflow-y:auto; height:100vh; min-width:0; }
+body.selecting main { padding-bottom:90px; }
+.top { display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+#search { flex:1; min-width:220px; padding:10px 14px; font-size:16px; border:1px solid var(--border);
           border-radius:8px; background:var(--panel); color:var(--text); }
 #search:focus { outline:2px solid var(--accent); outline-offset:-1px; }
-.btn { padding:10px 14px; border:1px solid var(--border); border-radius:8px;
-       background:var(--panel); color:var(--text); cursor:pointer; white-space:nowrap; }
-.btn:hover { border-color:var(--accent); }
+.btn { padding:9px 14px; border:1px solid var(--border); border-radius:8px; background:var(--panel);
+       color:var(--text); cursor:pointer; white-space:nowrap; }
+.btn:hover:not(:disabled) { border-color:var(--accent); }
+.btn:disabled { opacity:.45; cursor:default; }
 .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
 .btn.danger { color:var(--danger); }
-#status { color:var(--muted); font-size:13px; margin:0 0 16px; }
+.btn.on { border-color:var(--accent); background:var(--hover); color:var(--accent); }
+#status { color:var(--muted); font-size:13px; margin:4px 0 14px; }
 #banner { display:none; background:var(--warn-bg); color:var(--warn-text); border-radius:8px;
           padding:10px 14px; margin-bottom:12px; font-size:14px; align-items:center; gap:10px; flex-wrap:wrap; }
 #banner.on { display:flex; }
 #banner span { flex:1; min-width:200px; }
 #banner .btn { padding:6px 10px; font-size:13px; }
 
-#grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:18px; align-items:start; }
-.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
-.card h2 { font-size:15px; margin:0 0 8px; color:var(--accent); }
+/* ---- Chips ---- */
+.chips { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:2px 0 8px; }
+.chips .lab { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-right:4px; }
+.chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--panel);
+        color:var(--text); border-radius:999px; padding:3px 11px; font-size:13px; cursor:pointer; }
+.chip:hover { border-color:var(--accent); }
+.chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+.chip .ct { font-size:11px; opacity:.65; }
+.chip.ghost { border-style:dashed; color:var(--muted); }
+.chip.tc { border-color:var(--tc); background:color-mix(in srgb, var(--tc) 14%, var(--panel)); }
+.chip.tc.on { background:var(--tc); color:#fff; }
+.chip .tdot { width:8px; height:8px; border-radius:50%; background:var(--c); }
+.chip.on .tdot { background:#fff; }
+.hintline { font-size:13px; color:var(--muted); }
+
+/* ---- Kort ---- */
+#grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(310px, 1fr)); gap:18px; align-items:start; }
+.card { background:var(--panel); border:1px solid var(--border); border-top:4px solid var(--c); border-radius:10px; padding:10px 12px 12px; }
+.chead { display:flex; align-items:center; gap:8px; padding:2px 4px 8px; }
+.chead h2 { font-size:15px; margin:0; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cicon { font-size:17px; }
+.ccount { font-size:12px; color:var(--muted); }
+.chead .act { opacity:0; }
+.card:hover .chead .act { opacity:.7; }
 
 .row { display:flex; align-items:center; border-radius:6px; }
 .row:hover { background:var(--hover); }
 .row.first { outline:2px solid var(--accent); outline-offset:-2px; }
-.row a { flex:1; display:flex; gap:10px; align-items:center; padding:7px 8px;
-         color:var(--text); text-decoration:none; min-width:0; }
-.icon { width:22px; text-align:center; flex-shrink:0; }
-.txt { min-width:0; }
+.row.selmode { cursor:pointer; }
+.row.selmode a { pointer-events:none; }
+.row.picked { background:color-mix(in srgb, var(--accent) 16%, transparent); }
+.pickbox { padding-left:8px; font-size:17px; color:var(--accent); }
+.row a { flex:1; display:flex; gap:10px; align-items:flex-start; padding:7px 8px; color:var(--text); text-decoration:none; min-width:0; }
+.icon { width:22px; text-align:center; flex-shrink:0; line-height:1.4; }
+.txt { min-width:0; flex:1; }
 .name { display:block; }
+.badge { font-size:11px; color:var(--muted); margin-left:6px; }
 .sub { display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.act { background:none; border:0; cursor:pointer; font-size:17px; line-height:1;
-       color:var(--muted); padding:4px 6px; opacity:0; }
-.row:hover .act, .act:focus { opacity:1; }
-.star { opacity:.3; padding-right:10px; }
-.star.on { color:var(--star); opacity:1; }
+.rtags { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.tchip { font-size:11px; border:1px solid var(--border); border-radius:999px; padding:0 7px; line-height:1.6; color:var(--muted); cursor:pointer; }
+.tchip:hover { border-color:var(--accent); color:var(--accent); }
+.tchip.tc { border-color:var(--tc); color:var(--text); background:color-mix(in srgb, var(--tc) 14%, transparent); }
+.tchip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+.act { background:none; border:0; cursor:pointer; font-size:16px; line-height:1; color:var(--muted); padding:4px 6px; opacity:0; border-radius:4px; }
+.row:hover .act, .act:focus, .act.show { opacity:1; }
+.act.star { opacity:.3; padding-right:10px; }
+.act.star.on { color:var(--star); opacity:1; }
 .act:hover { color:var(--accent); }
 .empty { color:var(--muted); padding:40px 0; text-align:center; grid-column:1 / -1; }
-.hint { color:var(--muted); font-size:12px; margin-top:24px; }
+.hint { color:var(--muted); font-size:12px; margin-top:24px; line-height:1.8; }
 kbd { border:1px solid var(--border); border-radius:4px; padding:0 5px; font-size:11px; }
 
-/* ---- Dialog ---- */
-dialog { border:1px solid var(--border); border-radius:12px; padding:0; width:min(520px, 94vw);
+/* ---- Markér-bjælke ---- */
+#selbar { position:fixed; left:250px; right:0; bottom:0; background:var(--panel); border-top:2px solid var(--accent);
+          padding:10px 20px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; z-index:5; box-shadow:0 -4px 20px rgba(0,0,0,.12); }
+#selbar .btn { padding:6px 10px; font-size:13px; }
+#selbar .sep { width:1px; height:24px; background:var(--border); margin:0 4px; }
+.muted { color:var(--muted); font-size:13px; }
+.spacer { flex:1; }
+
+/* ---- Dialoger ---- */
+dialog { border:1px solid var(--border); border-radius:12px; padding:0; width:min(540px, 94vw);
          background:var(--panel); color:var(--text); box-shadow:0 10px 40px rgba(0,0,0,.3); }
+dialog.wide { width:min(680px, 94vw); }
 dialog::backdrop { background:rgba(0,0,0,.4); }
 dialog form { padding:20px 22px; display:flex; flex-direction:column; gap:12px; }
 dialog h2 { margin:0 0 4px; font-size:18px; }
-dialog label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); }
-dialog input:not([type=checkbox]) { padding:8px 10px; border:1px solid var(--border); border-radius:6px;
+dialog label, .field { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); }
+.flabel { font-size:13px; color:var(--muted); }
+dialog input:not([type=checkbox]), dialog select { padding:8px 10px; border:1px solid var(--border); border-radius:6px;
          background:var(--bg); color:var(--text); font-size:15px; }
-dialog input:focus { outline:2px solid var(--accent); outline-offset:-1px; }
-dialog small { color:var(--muted); font-size:12px; margin-top:-6px; }
-.two { display:grid; grid-template-columns:1fr 110px; gap:10px; }
+dialog input:focus, dialog select:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+dialog small { color:var(--muted); font-size:12px; line-height:1.5; }
+dialog p { margin:0; line-height:1.5; }
+.two { display:grid; grid-template-columns:1fr 120px; gap:10px; }
+.twoeq { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .emojis { display:flex; flex-wrap:wrap; gap:2px; margin-top:-4px; }
-.emojis button { background:none; border:1px solid transparent; border-radius:6px; cursor:pointer;
-                 font-size:18px; padding:2px 5px; }
+.emojis button { background:none; border:1px solid transparent; border-radius:6px; cursor:pointer; font-size:18px; padding:2px 5px; }
 .emojis button:hover { border-color:var(--border); background:var(--hover); }
 label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text); font-size:14px; }
-.btns { display:flex; gap:8px; margin-top:6px; }
-.spacer { flex:1; }
+.btns { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.swatches, .swrow { display:flex; flex-wrap:wrap; gap:6px; }
+.sw { width:26px; height:26px; border-radius:50%; border:2px solid transparent; background:var(--c); cursor:pointer; padding:0; }
+.sw.on { border-color:var(--text); box-shadow:0 0 0 2px var(--panel) inset; }
+.sw.none { background:var(--bg); border:1px dashed var(--muted); color:var(--muted); font-size:13px; line-height:1; }
+.sw.none.on { border:2px solid var(--text); }
+.swrow .sw { width:20px; height:20px; }
 
-#toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1f2937; color:#fff;
-         padding:10px 16px; border-radius:8px; font-size:14px; opacity:0; transition:opacity .2s;
-         pointer-events:none; max-width:90vw; z-index:10; }
-#toast.on { opacity:1; }
+.taginput { display:flex; flex-wrap:wrap; gap:5px; align-items:center; background:var(--bg); border:1px solid var(--border);
+            border-radius:6px; padding:5px 7px; cursor:text; }
+.taginput:focus-within { outline:2px solid var(--accent); outline-offset:-1px; }
+.taginput input { border:0 !important; background:none !important; outline:none !important; flex:1; min-width:140px; padding:3px 4px !important; }
+.taginput .chip { cursor:default; padding:1px 8px; }
+.taginput .x { cursor:pointer; margin-left:2px; font-weight:700; opacity:.8; }
+.taginput .x:hover { opacity:1; }
 
-/* ---- Tilføj filer fra mappe ---- */
+.tmlist { display:flex; flex-direction:column; gap:2px; max-height:55vh; overflow-y:auto; }
+.tm-r { display:flex; align-items:center; gap:10px; padding:6px 4px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.tm-r .nm { min-width:130px; }
+.tm-r .n { font-size:12px; color:var(--muted); width:28px; text-align:right; }
+.tm-r .swrow { flex:1; }
+
 .pick { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-#fdInfo { font-size:13px; color:var(--muted); }
+#fdInfo { font-size:13px; color:var(--text); }
 .warn { background:var(--warn-bg); color:var(--warn-text); border-radius:6px; padding:8px 10px; font-size:13px; }
-.flist { border:1px solid var(--border); border-radius:6px; max-height:320px; overflow-y:auto; background:var(--bg); }
+.flist { border:1px solid var(--border); border-radius:6px; max-height:300px; overflow-y:auto; background:var(--bg); }
 .frow { display:flex !important; flex-direction:row !important; align-items:center; gap:8px; padding:5px 10px;
         color:var(--text) !important; font-size:14px !important; cursor:pointer; border-bottom:1px solid var(--border); }
 .frow:last-child { border-bottom:0; }
 .frow:hover { background:var(--hover); }
 .frow .txt { flex:1; }
+.frow.dir .name { font-weight:600; }
 .frow.exists { opacity:.5; cursor:default; }
 .frow em { font-size:12px; color:var(--muted); white-space:nowrap; }
 .fmore { padding:8px 10px; font-size:12px; color:var(--muted); }
-#fdFilter { padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:15px; }
-.frow.dir .name { font-weight:600; }
-#fdlg { width:min(640px, 94vw); }
+#fdFilter { flex:1; }
+#fdStep2 { display:flex; flex-direction:column; gap:12px; }
+
+#toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1f2937; color:#fff;
+         padding:10px 16px; border-radius:8px; font-size:14px; opacity:0; transition:opacity .2s;
+         pointer-events:none; max-width:90vw; z-index:20; }
+#toast.on { opacity:1; }
+body.selecting #toast { bottom:80px; }
+
+@media (max-width:760px) {
+  nav { width:190px; }
+  #selbar { left:190px; }
+  main { padding:16px; }
+}
 </style>
 </head>
 <body>
@@ -128,11 +207,11 @@ label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text)
   <h1>🏠 Genveje</h1>
   <div id="navItems"></div>
   <div class="tools">
-    <hr>
-    <button id="exportBtn" title="Hent en kopi af siden med alle dine genveje indbygget"><span>💾 Gem kopi af siden</span><span id="dirty" class="dot" title="Der er ændringer der ikke er gemt i en kopi endnu"></span></button>
-    <button id="backupBtn" title="Hent en backup-fil med kun dine genveje – kan importeres i en ny version af siden"><span>⬇️ Eksportér genveje</span></button>
+    <button id="tagMgrBtn" title="Giv tags farver, omdøb eller slet dem"><span>🎨 Tags og farver</span></button>
+    <button id="exportBtn" title="Hent en kopi af siden med alle dine genveje indbygget"><span>💾 Gem kopi af siden</span><span id="dirty" class="dot" title="Der er ændringer der ikke er gemt i en kopi eller backup endnu"></span></button>
+    <button id="backupBtn" title="Hent en backup-fil med kun dine genveje, kategorier og tags – kan importeres i en ny version af siden"><span>⬇️ Eksportér genveje</span></button>
     <button id="importBtn" title="Indlæs genveje fra en backup-fil eller en gemt Genveje.html"><span>⬆️ Importér genveje…</span></button>
-    <input type="file" id="importFile" accept=".html,.htm,.js,.json" hidden>
+    <input type="file" id="importFile" accept=".json,.html,.htm,.js" hidden>
   </div>
 </nav>
 
@@ -141,17 +220,24 @@ label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text)
   <div class="top">
     <input id="search" type="search" placeholder="Søg efter genvej… (tryk / for at søge)" autocomplete="off">
     <button id="addBtn" class="btn primary">+ Tilføj genvej</button>
-    <button id="addFilesBtn" class="btn" title="Vælg flere filer fra en mappe på én gang">📂 Tilføj fra mappe</button>
+    <button id="addFilesBtn" class="btn" title="Vælg flere filer og mapper fra en mappe på én gang">📂 Tilføj fra mappe</button>
+    <button id="selBtn" class="btn" title="Markér flere genveje og redigér dem samlet">☑ Markér</button>
     <button id="theme" class="btn" title="Skift lyst/mørkt tema">🌓</button>
   </div>
+  <div id="tagRow" class="chips" hidden></div>
   <div id="status"></div>
   <div id="grid"></div>
   <div class="hint">
-    <kbd>/</kbd> søg &nbsp; <kbd>Enter</kbd> åbn første resultat &nbsp; <kbd>Esc</kbd> ryd søgning &nbsp;
-    ★ favorit &nbsp; ✎ redigér &nbsp; Træk et link fra adresselinjen ind på siden for at tilføje det
+    <kbd>/</kbd> søg &nbsp; <kbd>Enter</kbd> åbn første resultat &nbsp; <kbd>Esc</kbd> ryd søgning / afslut markering &nbsp;
+    ★ favorit &nbsp; ✎ redigér &nbsp; Klik på et tag for at filtrere &nbsp; Træk et link fra adresselinjen ind på siden for at tilføje det
   </div>
 </main>
 
+<div id="selbar" hidden></div>
+
+<datalist id="tagList"></datalist>
+
+<!-- ======== Dialog: tilføj / redigér genvej ======== -->
 <dialog id="dlg">
   <form id="form">
     <h2 id="dlgTitle">Tilføj genvej</h2>
@@ -159,26 +245,32 @@ label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text)
     <label>Adresse eller filsti *
       <input id="fUrl" required autocomplete="off" placeholder="https://…  eller  C:\Mappe\fil.xlsx">
     </label>
-    <small>Webadresse, SharePoint-link (⋯ → Kopiér link) eller sti fra Stifinder (højreklik → Kopiér som sti).</small>
+    <small>Webadresse, SharePoint-link eller filsti. Fil i Stifinder: markér den → Ctrl+Shift+C (Kopiér som sti) → indsæt her.</small>
+
+    <div id="fDeskRow" hidden>
+      <label class="check"><input type="checkbox" id="fDesk"> <span id="fDeskLabel">Åbn i Excel i stedet for browseren</span></label>
+      <small>Virker med den direkte adresse til en Office-fil på SharePoint/OneDrive. Browseren spørger første gang, om den må åbne programmet – test linket én gang.</small>
+    </div>
 
     <label>Navn *
       <input id="fName" required autocomplete="off">
     </label>
 
     <div class="two">
-      <label>Kategori *
-        <input id="fCat" list="catList" required autocomplete="off" placeholder="Vælg eller skriv ny">
+      <label>Kategori
+        <select id="fCat"></select>
       </label>
       <label>Ikon
         <input id="fIcon" maxlength="8" autocomplete="off">
       </label>
     </div>
-    <datalist id="catList"></datalist>
     <div class="emojis" id="emojis"></div>
 
-    <label>Søgeord
-      <input id="fTags" autocomplete="off" placeholder="adskil med komma, fx fragt, rapport">
-    </label>
+    <div class="field">
+      <span class="flabel">Tags</span>
+      <div id="fTagsBox"></div>
+      <small>Tryk Enter (eller komma) efter hvert tag. Eksisterende tags foreslås.</small>
+    </div>
 
     <label>Note
       <input id="fNote" autocomplete="off" placeholder="Vises under navnet i stedet for adressen">
@@ -195,53 +287,46 @@ label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text)
   </form>
 </dialog>
 
-<div id="toast"></div>
-
-<dialog id="idlg">
-  <form method="dialog" onsubmit="return false">
-    <h2>Importér genveje</h2>
-    <p id="iText" style="margin:0;line-height:1.5"></p>
-    <small style="margin:0">“Tilføj kun nye” beholder dine nuværende genveje og tilføjer dem fra filen, du ikke har i forvejen (sammenlignet på adresse).</small>
-    <div class="btns">
-      <button type="button" id="iCancel" class="btn">Annuller</button>
-      <span class="spacer"></span>
-      <button type="button" id="iMerge" class="btn">Tilføj kun nye</button>
-      <button type="button" id="iReplace" class="btn primary">Erstat alle</button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="fdlg">
+<!-- ======== Dialog: tilføj filer og mapper ======== -->
+<dialog id="fdlg" class="wide">
   <form id="fform">
     <h2>Tilføj filer og mapper</h2>
 
-    <label>1. Mappens sti *
-      <input id="fdPath" list="fdPaths" required autocomplete="off" placeholder="C:\Users\…\Rapporter   eller   \\server\share\mappe">
-    </label>
-    <datalist id="fdPaths"></datalist>
-    <small>Markér mappen i Stifinder → Ctrl+Shift+C (eller Shift+højreklik → Kopiér som sti) og indsæt her. Stier du har brugt før, kan vælges i listen.</small>
-
     <div class="pick">
-      <button type="button" id="fdPick" class="btn">2. Vælg samme mappe…</button>
-      <span id="fdInfo">Browseren spørger måske om du vil “uploade” filerne – intet sendes nogen steder, siden læser kun filnavnene.</span>
+      <button type="button" id="fdPick" class="btn primary">1. Vælg mappe…</button>
+      <span id="fdInfo"></span>
     </div>
+    <small id="fdTip">Dialogen åbner der, hvor browseren sidst var. Har du mappens sti i udklipsholderen, så klik i adresselinjen øverst i dialogen, tryk Ctrl+V og Enter. Browseren spørger måske, om du vil “uploade” filerne – intet sendes nogen steder; siden læser kun filnavnene.</small>
     <input type="file" id="fdInput" webkitdirectory multiple hidden>
 
-    <div id="fdWarn" class="warn" hidden></div>
+    <div id="fdStep2" hidden>
+      <label>2. Mappens fulde sti *
+        <input id="fdPath" list="fdPaths" autocomplete="off" placeholder="C:\Users\…\Rapporter   eller   \\server\share\mappe">
+      </label>
+      <datalist id="fdPaths"></datalist>
+      <small id="fdPathHint"></small>
+      <div id="fdWarn" class="warn" hidden></div>
 
-    <div class="pick" id="fdTools" hidden>
-      <input id="fdFilter" type="search" placeholder="Filtrér, fx xlsx eller budget" autocomplete="off" style="flex:1">
-      <select id="fdType" class="btn" style="padding:8px 10px">
-        <option value="all">Filer og mapper</option>
-        <option value="files">Kun filer</option>
-        <option value="dirs">Kun mapper</option>
-      </select>
+      <div class="pick">
+        <input id="fdFilter" type="search" placeholder="Filtrér, fx xlsx eller budget" autocomplete="off">
+        <select id="fdType">
+          <option value="all">Filer og mapper</option>
+          <option value="files">Kun filer</option>
+          <option value="dirs">Kun mapper</option>
+        </select>
+      </div>
+      <div id="fdList" class="flist"></div>
+
+      <div class="twoeq">
+        <label>3. Kategori
+          <select id="fdCat"></select>
+        </label>
+        <div class="field">
+          <span class="flabel">Tags til alle (valgfrit)</span>
+          <div id="fdTagsBox"></div>
+        </div>
+      </div>
     </div>
-    <div id="fdList" class="flist" hidden></div>
-
-    <label>3. Kategori *
-      <input id="fdCat" list="catList" required autocomplete="off" placeholder="Vælg eller skriv ny">
-    </label>
 
     <div class="btns">
       <button type="button" id="fdAll" class="btn" hidden>Vælg alle viste</button>
@@ -252,17 +337,28 @@ label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text)
   </form>
 </dialog>
 
-<!-- Startgenveje. Opdateres automatisk når du bruger "Gem kopi af siden". -->
+<div id="toast"></div>
+
+<!-- Startdata. Opdateres automatisk når du bruger "Gem kopi af siden". -->
 <script id="linksData">
-window.LINKS = [
-  {"category":"Power Platform","name":"Power BI","url":"https://app.powerbi.com","icon":"📊","favorite":true},
-  {"category":"Power Platform","name":"Power Automate","url":"https://make.powerautomate.com","icon":"⚙️","favorite":true},
-  {"category":"Microsoft 365","name":"Outlook","url":"https://outlook.cloud.microsoft/mail/","icon":"📧"},
-  {"category":"Microsoft 365","name":"Excel Online","url":"https://excel.cloud.microsoft/","icon":"📗"},
-  {"category":"Microsoft 365","name":"To Do","url":"https://to-do.office.com/","icon":"📋"},
-  {"category":"SharePoint","name":"Salg","url":"https://contoso.sharepoint.com/sites/Salg","icon":"📁","favorite":true},
-  {"category":"SharePoint","name":"Genbrug","url":"https://contoso.sharepoint.com/sites/Genbrug","icon":"♻️","favorite":true,"tags":["weee","rapportering"]}
-];
+window.GENVEJE = {
+  "version": 2,
+  "categories": [
+    {"id":"c-power","name":"Power Platform","icon":"📊","color":"#0078d4"},
+    {"id":"c-m365","name":"Microsoft 365","icon":"📧","color":"#d83b01"},
+    {"id":"c-sp","name":"SharePoint","icon":"📁","color":"#008272"}
+  ],
+  "tagColors": {},
+  "links": [
+    {"id":"l-pbi","name":"Power BI","url":"https://app.powerbi.com","category":"c-power","icon":"📊","favorite":true},
+    {"id":"l-pa","name":"Power Automate","url":"https://make.powerautomate.com","category":"c-power","icon":"⚙️","favorite":true},
+    {"id":"l-outlook","name":"Outlook","url":"https://outlook.cloud.microsoft/mail/","category":"c-m365","icon":"📧"},
+    {"id":"l-excel","name":"Excel Online","url":"https://excel.cloud.microsoft/","category":"c-m365","icon":"📗"},
+    {"id":"l-todo","name":"To Do","url":"https://to-do.office.com/","category":"c-m365","icon":"📋"},
+    {"id":"l-salg","name":"Salg","url":"https://contoso.sharepoint.com/sites/Salg","category":"c-sp","icon":"📁","favorite":true},
+    {"id":"l-weee","name":"Genbrug","url":"https://contoso.sharepoint.com/sites/Genbrug","category":"c-sp","icon":"♻️","favorite":true,"tags":["WEEE","Rapportering"]}
+  ]
+};
 </script>
 <script>
 (function () {
@@ -271,15 +367,18 @@ window.LINKS = [
   // Kopi af siden som den ser ud før noget er tegnet – bruges af "Gem kopi af siden"
   const PAGE_TEMPLATE = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
-  const LINKS_KEY = "genveje.links";
-  const BASE_KEY  = "genveje.base";
-  const FAV_KEY   = "genveje.favorites";
-  const THEME_KEY = "genveje.theme";
-  const DIRTY_KEY = "genveje.dirty";
-  const ALL = "__all", FAV = "__fav";
-  const EMOJIS = ["📊","📁","📂","📗","📘","📙","📕","📄","⚙️","📧","📋","♻️","🔗","⭐","🛠️","💰","🚚","👥"];
+  const K = {
+    state: "genveje.state", base: "genveje.base", theme: "genveje.theme", dirty: "genveje.dirty",
+    folders: "genveje.folders", legacyLinks: "genveje.links", legacyFavs: "genveje.favorites"
+  };
+  const ALL = "__all", FAV = "__fav", NONE = "__none";
+  const COLORS = ["#0078d4","#107c10","#d83b01","#b4009e","#5c2d91","#008272","#c50f1f","#986f0b","#4f6bed","#69797e"];
+  const EMOJIS = ["📊","📁","📂","📗","📘","📙","📕","📄","⚙️","📧","📋","♻️","🔗","⭐","🛠️","💰","🚚","👥","🏭","📅"];
+  const APPNAME = { "ms-excel":"Excel", "ms-word":"Word", "ms-powerpoint":"PowerPoint" };
 
   const $ = id => document.getElementById(id);
+  const lc = s => String(s ?? "").toLowerCase();
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
   // ---------- Hjælpefunktioner ----------
   const store = {
@@ -287,8 +386,39 @@ window.LINKS = [
     set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
     del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   };
-  const esc = s => String(s ?? "").replace(/[&<>"']/g,
-    c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+  // Lille hjælper til at bygge HTML-elementer
+  function el(tag, props, ...kids) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v;
+      else if (k === "style") { for (const [a, b] of Object.entries(v)) a.startsWith("--") ? e.style.setProperty(a, b) : (e.style[a] = b); }
+      else if (k.startsWith("on") && typeof v === "function") e.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (v === true) e.setAttribute(k, "");
+      else e.setAttribute(k, v);
+    }
+    kids.flat(Infinity).forEach(c => { if (c == null || c === false) return; e.append(c.nodeType ? c : document.createTextNode(String(c))); });
+    return e;
+  }
+  // Som replaceChildren, men tåler lister og tomme værdier
+  const fill = (node, ...kids) => node.replaceChildren(...kids.flat(Infinity).filter(k => k != null && k !== false));
+  const field = (label, control, hint) =>
+    el("div", { class: "field" }, el("span", { class: "flabel" }, label), control, hint ? el("small", {}, hint) : null);
+
+  // Dialog bygget i kode; fjernes igen når den lukkes
+  function modal(title, body, buttons, opts = {}) {
+    const form = el("form", {}, el("h2", {}, title), body, el("div", { class: "btns" }, buttons));
+    const d = el("dialog", { class: opts.wide ? "wide" : null }, form);
+    form.addEventListener("submit", e => { e.preventDefault(); opts.onSubmit ? opts.onSubmit(d) : d.close(); });
+    d.addEventListener("close", () => d.remove());
+    document.body.append(d);
+    d.showModal();
+    return d;
+  }
+  const cancelBtn = () => el("button", { type: "button", class: "btn", onClick: e => e.target.closest("dialog").close() }, "Annuller");
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const namesOf = ls => ls.slice(0, 6).map(l => l.name).join(", ") + (ls.length > 6 ? ` og ${ls.length - 6} flere` : "");
 
   let toastTimer;
   function toast(msg, ms = 3500) {
@@ -299,21 +429,19 @@ window.LINKS = [
     toastTimer = setTimeout(() => t.classList.remove("on"), ms);
   }
 
-  function shortUrl(url) {
-    try {
-      const u = new URL(url);
-      if (u.protocol === "file:") {
-        return decodeURIComponent(u.host
-          ? "\\\\" + u.host + u.pathname.replace(/\//g, "\\")
-          : u.pathname.replace(/^\//, "").replace(/\//g, "\\"));
-      }
-      return u.host + (u.pathname !== "/" ? u.pathname : "");
-    } catch (e) { return url; }
+  function download(content, filename, type) {
+    const blob = new Blob([content], { type: type + ";charset=utf-8" });
+    const a = el("a", { href: URL.createObjectURL(blob), download: filename });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
+  // ---------- Adresser ----------
   // Gør Windows-stier og "www."-adresser til rigtige links
   function normalizeUrl(s) {
-    s = String(s || "").trim().replace(/^"(.*)"$/, "$1").trim();   // "Kopiér som sti" tilføjer anførselstegn
+    s = String(s || "").trim().replace(/^["'“”]+|["'“”]+$/g, "").trim();     // "Kopiér som sti" tilføjer anførselstegn
     if (/^[a-zA-Z]:[\\/]/.test(s) || /^\\\\/.test(s)) {
       // C:\a b\x#1.xlsx → file:///C:/a%20b/x%231.xlsx,   \\srv\x → file://///srv/x
       return "file:///" + s.replace(/\\/g, "/").split("/")
@@ -324,6 +452,18 @@ window.LINKS = [
     return s;
   }
 
+  function shortUrl(url) {
+    try {
+      const u = new URL(url);
+      if (u.protocol === "file:") {
+        return decodeURIComponent(u.host
+          ? "\\\\" + u.host + u.pathname.replace(/\//g, "\\")
+          : u.pathname.replace(/^\/+(?=[a-zA-Z]:)/, "").replace(/^\/(?=\/)/, "").replace(/\//g, "\\"));
+      }
+      return u.host + (u.pathname !== "/" ? decodeURIComponent(u.pathname) : "");
+    } catch (e) { return url; }
+  }
+
   function guessName(url) {
     try {
       const u = new URL(url);
@@ -331,19 +471,19 @@ window.LINKS = [
       if (fileParam) return fileParam.replace(/\.[^.]+$/, "");
       const seg = decodeURIComponent(u.pathname.split("/").filter(Boolean).pop() || "");
       if (u.protocol === "file:") return seg.replace(/\.[^.]+$/, "") || url;
-      if (/\.(xlsx?|xlsm|docx?|pptx?|pdf|csv|pbix|txt)$/i.test(seg)) return seg.replace(/\.[^.]+$/, "");
+      if (/\.(xlsx?|xlsm|xlsb|docx?|pptx?|pdf|csv|pbix|txt)$/i.test(seg)) return seg.replace(/\.[^.]+$/, "");
       return u.hostname.replace(/^www\./, "");
     } catch (e) { return ""; }
   }
 
   function guessIcon(url) {
-    const s = url.toLowerCase();
+    const s = lc(url);
     const sp = s.match(/sharepoint\.com\/:([xwpb]):\//);
     if (sp) return { x:"📗", w:"📘", p:"📙", b:"📕" }[sp[1]];
     const path = s.split(/[?#]/)[0];
     let ext = (path.match(/\.([a-z0-9]+)$/) || [])[1];
-    try { const f = new URL(url).searchParams.get("file"); if (f) ext = (f.toLowerCase().match(/\.([a-z0-9]+)$/) || [])[1]; } catch (e) {}
-    const byExt = { xlsx:"📗", xlsm:"📗", xls:"📗", csv:"📗", docx:"📘", doc:"📘", pptx:"📙", ppt:"📙", pdf:"📕", pbix:"📊", txt:"📄" };
+    try { const f = new URL(url).searchParams.get("file"); if (f) ext = (lc(f).match(/\.([a-z0-9]+)$/) || [])[1]; } catch (e) {}
+    const byExt = { xlsx:"📗", xlsm:"📗", xlsb:"📗", xls:"📗", csv:"📗", docx:"📘", doc:"📘", pptx:"📙", ppt:"📙", pdf:"📕", pbix:"📊", txt:"📄" };
     if (byExt[ext]) return byExt[ext];
     if (s.includes("powerbi")) return "📊";
     if (s.includes("powerautomate")) return "⚙️";
@@ -353,54 +493,153 @@ window.LINKS = [
     return "🔗";
   }
 
-  function clean(arr) {
-    return (Array.isArray(arr) ? arr : [])
-      .filter(l => l && l.name && l.url)
-      .map(l => {
-        const o = { category: String(l.category || "Andet"), name: String(l.name), url: String(l.url) };
-        if (l.icon) o.icon = String(l.icon);
-        if (l.favorite) o.favorite = true;
-        if (Array.isArray(l.tags) && l.tags.length) o.tags = l.tags.map(String);
-        if (l.note) o.note = String(l.note);
-        return o;
-      });
+  // Office-fil på en webadresse → hvilket skrivebordsprogram kan åbne den
+  function officeApp(url) {
+    if (!/^https?:\/\//i.test(url || "")) return null;
+    let ext;
+    try { ext = (lc(decodeURIComponent(new URL(url).pathname)).match(/\.([a-z0-9]+)$/) || [])[1]; } catch (e) { return null; }
+    if (["xlsx","xlsm","xlsb","xls","csv"].includes(ext)) return "ms-excel";
+    if (["docx","docm","doc"].includes(ext)) return "ms-word";
+    if (["pptx","pptm","ppt"].includes(ext)) return "ms-powerpoint";
+    return null;
+  }
+  function hrefOf(l) {
+    const app = l.desktop ? officeApp(l.url) : null;
+    return app ? `${app}:ofe|u|${l.url}` : l.url;
+  }
+  const isWebHref = h => /^(https?|file):/i.test(h);
+  function openHref(h) {
+    if (isWebHref(h)) window.open(h, "_blank", "noopener");
+    else location.href = h;
   }
 
   // ---------- Data ----------
-  const fileOk = Array.isArray(window.LINKS);
-  const baseSig = fileOk ? JSON.stringify(window.LINKS) : null;
-
-  let links = null;
-  const savedLinks = store.get(LINKS_KEY);
-  if (savedLinks) { try { links = clean(JSON.parse(savedLinks)); } catch (e) { links = null; } }
-  const usingSaved = links !== null;
-  if (!usingSaved) links = clean(window.LINKS);
-
-  let favs = null;
-  const savedFavs = store.get(FAV_KEY);
-  if (savedFavs) { try { favs = new Set(JSON.parse(savedFavs)); } catch (e) {} }
-  if (!favs) favs = new Set(links.filter(l => l.favorite).map(l => l.url));
-
-  let active = ALL;
-  let query = "";
-  let firstUrl = null;
-
-  const categories = () => {
-    const c = [];
-    links.forEach(l => { if (!c.includes(l.category)) c.push(l.category); });
-    return c;
-  };
-
-  function persist() {
-    const ok = store.set(LINKS_KEY, JSON.stringify(links));
-    if (baseSig !== null) store.set(BASE_KEY, baseSig);
-    store.set(FAV_KEY, JSON.stringify([...favs]));
-    store.set(DIRTY_KEY, "1");
-    $("dirty").classList.add("on");
-    if (!ok) toast("⚠️ Browseren tillader ikke at gemme her – brug “Gem kopi af siden” for ikke at miste ændringerne.", 6000);
+  function cleanTags(arr) {
+    const out = [];
+    (Array.isArray(arr) ? arr : []).forEach(t => {
+      const v = String(t ?? "").trim();
+      if (v && !out.some(x => lc(x) === lc(v))) out.push(v);
+    });
+    return out;
   }
 
-  function saveFavs() { store.set(FAV_KEY, JSON.stringify([...favs])); }
+  // Læser alle kendte formater: ny (v2), gammel links-liste (v1) og backup-filer
+  function normalizeData(input) {
+    let raw = input;
+    if (Array.isArray(raw)) raw = { links: raw };
+    if (!raw || typeof raw !== "object" || !Array.isArray(raw.links)) return null;
+
+    const categories = [], byId = new Map(), byName = new Map();
+    const addCat = c => { categories.push(c); byId.set(c.id, c); byName.set(lc(c.name), c); return c; };
+    (Array.isArray(raw.categories) ? raw.categories : []).forEach(c => {
+      if (!c || !String(c.name || "").trim()) return;
+      const name = String(c.name).trim();
+      if (byName.has(lc(name))) return;
+      let id = String(c.id || "");
+      if (!id || byId.has(id)) id = "c-" + uid();
+      const color = typeof c.color === "string" && /^#[0-9a-f]{3,8}$/i.test(c.color) ? c.color : COLORS[categories.length % COLORS.length];
+      addCat({ id, name, icon: String(c.icon || "📁"), color });
+    });
+    const catFor = v => {
+      if (!v) return "";
+      v = String(v);
+      if (byId.has(v)) return v;
+      const hit = byName.get(lc(v.trim()));
+      if (hit) return hit.id;
+      return addCat({ id: "c-" + uid(), name: v.trim(), icon: "📁", color: COLORS[categories.length % COLORS.length] }).id;
+    };
+
+    const ids = new Set(), links = [];
+    raw.links.forEach(l => {
+      if (!l || !String(l.name || "").trim() || !String(l.url || "").trim()) return;
+      const o = { id: String(l.id || ""), name: String(l.name).trim(), url: String(l.url).trim(), category: catFor(l.category) };
+      if (!o.id || ids.has(o.id)) o.id = "l-" + uid();
+      ids.add(o.id);
+      if (l.icon) o.icon = String(l.icon);
+      const tags = cleanTags(l.tags);
+      if (tags.length) o.tags = tags;
+      if (l.note) o.note = String(l.note);
+      if (l.favorite) o.favorite = true;
+      if (l.desktop) o.desktop = true;
+      links.push(o);
+    });
+
+    const tagColors = {};
+    if (raw.tagColors && typeof raw.tagColors === "object") {
+      for (const [k, v] of Object.entries(raw.tagColors)) if (typeof v === "string") tagColors[lc(k)] = v;
+    }
+    const folders = raw.folders && typeof raw.folders === "object" ? raw.folders : null;
+    return { links, categories, tagColors, folders };
+  }
+
+  const embeddedRaw = window.GENVEJE || window.LINKS || null;
+  const embedded = normalizeData(embeddedRaw);
+  const baseSig = embedded ? JSON.stringify(embeddedRaw) : null;
+  const fresh = () => { const e = normalizeData(embeddedRaw); return e ? { links: e.links, categories: e.categories, tagColors: e.tagColors } : { links: [], categories: [], tagColors: {} }; };
+
+  let D = null;
+  let fileDiffers = false;
+  const savedState = store.get(K.state);
+  if (savedState) {
+    try { const n = normalizeData(JSON.parse(savedState)); if (n) D = { links: n.links, categories: n.categories, tagColors: n.tagColors }; } catch (e) {}
+    if (D && embedded && store.get(K.base) !== baseSig) fileDiffers = true;
+  }
+  let migrated = false;
+  if (!D) {
+    // Data fra den tidligere version af siden (før kategorier og tags fik deres egen struktur)
+    const legacy = store.get(K.legacyLinks);
+    if (legacy) {
+      try {
+        const n = normalizeData(JSON.parse(legacy));
+        if (n) {
+          const favRaw = store.get(K.legacyFavs);
+          if (favRaw) {
+            const favs = new Set(JSON.parse(favRaw));
+            n.links.forEach(l => { if (favs.has(l.url)) l.favorite = true; else delete l.favorite; });
+          }
+          D = { links: n.links, categories: n.categories, tagColors: n.tagColors };
+          migrated = true;
+        }
+      } catch (e) {}
+    }
+  }
+  if (!D) D = fresh();
+
+  const UI = { view: ALL, q: "", tags: new Set(), tagMode: "and", allTags: false, select: false, sel: new Set(), last: null, order: [] };
+  let firstLink = null;
+
+  const catById = id => D.categories.find(c => c.id === id) || null;
+  const catOf = l => catById(l.category);
+  const linkById = id => D.links.find(l => l.id === id) || null;
+  const tagColor = t => D.tagColors[lc(t)] || null;
+  const folderMap = () => { try { return JSON.parse(store.get(K.folders) || "{}") || {}; } catch (e) { return {}; } };
+
+  function tagStats(list) {
+    const m = new Map();
+    list.forEach(l => (l.tags || []).forEach(t => {
+      const k = lc(t), e = m.get(k) || { key: k, name: t, n: 0 };
+      e.n++; m.set(k, e);
+    }));
+    return [...m.values()].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, "da"));
+  }
+  const displayTag = key => (tagStats(D.links).find(t => t.key === key) || { name: key }).name;
+  // Skriver man et tag der findes i forvejen, bruges den eksisterende stavemåde
+  const canonTag = (v, excludeKey) => { const hit = tagStats(D.links).find(t => t.key === lc(v) && t.key !== excludeKey); return hit ? hit.name : v; };
+  function updateTagList() {
+    $("tagList").replaceChildren(...tagStats(D.links).map(t => el("option", { value: t.name })));
+  }
+
+  function persist() {
+    const ok = store.set(K.state, JSON.stringify({ version: 2, links: D.links, categories: D.categories, tagColors: D.tagColors }));
+    if (baseSig !== null) store.set(K.base, baseSig);
+    store.set(K.dirty, "1");
+    $("dirty").classList.add("on");
+    if (!ok) toast("⚠️ Browseren tillader ikke at gemme her – brug “Eksportér genveje” for ikke at miste ændringerne.", 6000);
+  }
+  function markSaved() { store.del(K.dirty); $("dirty").classList.remove("on"); }
+
+  if (migrated) { persist(); store.del(K.legacyLinks); store.del(K.legacyFavs); }
+  if (store.get(K.dirty)) $("dirty").classList.add("on");
 
   // ---------- Banner ----------
   function showBanner(html) {
@@ -408,138 +647,516 @@ window.LINKS = [
     b.innerHTML = html;
     b.classList.toggle("on", !!html);
   }
-
-  if (!fileOk && !usingSaved) {
+  if (!embedded && !savedState && !migrated) {
     showBanner("<span>Genvejslisten i filen indeholder en fejl (F12 → Konsol viser hvor). Du kan stadig tilføje genveje her.</span>");
-  } else if (usingSaved && fileOk && store.get(BASE_KEY) !== baseSig) {
+  } else if (fileDiffers) {
     showBanner(`<span><b>Genvejene i denne fil er anderledes</b> end dem browseren har gemt. Hvilke vil du bruge?</span>
       <button class="btn" id="useFile">Brug filens genveje</button>
       <button class="btn" id="keepMine">Behold browserens version</button>`);
     $("useFile").onclick = () => {
-      links = clean(window.LINKS);
-      favs = new Set(links.filter(l => l.favorite).map(l => l.url));
-      persist();
-      store.del(DIRTY_KEY); $("dirty").classList.remove("on");
+      D = fresh();
+      persist(); markSaved();
+      UI.view = ALL; UI.tags.clear();
       showBanner(""); render();
       toast("Genveje indlæst fra filen");
     };
-    $("keepMine").onclick = () => { store.set(BASE_KEY, baseSig); showBanner(""); };
+    $("keepMine").onclick = () => { store.set(K.base, baseSig); showBanner(""); };
   }
-  if (store.get(DIRTY_KEY)) $("dirty").classList.add("on");
 
   // ---------- Tema ----------
   const root = document.documentElement;
-  const savedTheme = store.get(THEME_KEY);
   const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  root.dataset.theme = savedTheme || (prefersDark ? "dark" : "light");
+  root.dataset.theme = store.get(K.theme) || (prefersDark ? "dark" : "light");
   $("theme").addEventListener("click", () => {
     root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-    store.set(THEME_KEY, root.dataset.theme);
+    store.set(K.theme, root.dataset.theme);
   });
 
   // ---------- Filtrering ----------
-  function visible() {
-    let list = links;
-    if (active === FAV) list = list.filter(l => favs.has(l.url));
-    else if (active !== ALL) list = list.filter(l => l.category === active);
+  function matches(l, o = {}) {
+    if (UI.view === FAV) { if (!l.favorite) return false; }
+    else if (UI.view === NONE) { if (catOf(l)) return false; }
+    else if (UI.view !== ALL && l.category !== UI.view) return false;
 
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = lc(UI.q).split(/\s+/).filter(Boolean);
     if (terms.length) {
-      list = list.filter(l => {
-        const hay = [l.name, l.category, l.url, l.note, ...(l.tags || [])].join(" ").toLowerCase();
-        return terms.every(t => hay.includes(t));
-      });
+      const c = catOf(l);
+      const hay = lc([l.name, l.url, shortUrl(l.url), l.note, (l.tags || []).join(" "), c ? c.name : ""].join(" "));
+      if (!terms.every(t => hay.includes(t))) return false;
     }
-    return list;
+    if (!o.skipTags && UI.tags.size) {
+      const lt = new Set((l.tags || []).map(lc)), sel = [...UI.tags];
+      if (UI.tagMode === "and" ? !sel.every(t => lt.has(t)) : !sel.some(t => lt.has(t))) return false;
+    }
+    return true;
+  }
+  function toggleTag(key) { UI.tags.has(key) ? UI.tags.delete(key) : UI.tags.add(key); render(); }
+  function clearFilters() {
+    UI.q = ""; $("search").value = "";
+    UI.tags.clear(); UI.tagMode = "and"; UI.view = ALL;
+    render();
   }
 
   // ---------- Venstremenu ----------
   function renderNav() {
-    const cats = categories();
-    if (active !== ALL && active !== FAV && !cats.includes(active)) active = ALL;
+    const count = fn => D.links.filter(fn).length;
+    const item = (key, icon, label, n, color, editable) =>
+      el("button", { class: "navbtn" + (UI.view === key ? " active" : ""), style: color ? { "--c": color } : null, "data-view": key, title: label },
+        el("span", { class: "nicon" }, icon),
+        el("span", { class: "nlabel" }, label),
+        editable ? el("span", { class: "nedit", title: "Redigér kategori", "data-catedit": key }, "✎") : null,
+        el("span", { class: "count" }, n));
 
-    const btn = (key, label, count) =>
-      `<button data-cat="${esc(key)}" class="${key === active ? "active" : ""}">
-         <span>${label}</span><span class="count">${count}</span></button>`;
-
-    let html = btn(ALL, "📚 Alle", links.length)
-             + btn(FAV, "⭐ Favoritter", links.filter(l => favs.has(l.url)).length)
-             + "<hr>";
-    cats.forEach(c => { html += btn(c, esc(c), links.filter(l => l.category === c).length); });
-    $("navItems").innerHTML = html;
+    const parts = [
+      item(ALL, "📚", "Alle", D.links.length),
+      item(FAV, "⭐", "Favoritter", count(l => l.favorite)),
+      el("div", { class: "navsec" }, el("span", {}, "Kategorier"), el("button", { class: "navadd", title: "Ny kategori", "data-newcat": "1" }, "+"))
+    ];
+    D.categories.forEach(c => parts.push(item(c.id, c.icon, c.name, count(l => l.category === c.id), c.color, true)));
+    const none = count(l => !catOf(l));
+    if (none) parts.push(item(NONE, "•", "Uden kategori", none));
+    if (!D.categories.length) parts.push(el("div", { class: "navhint" }, "Ingen kategorier endnu – klik + for at oprette en."));
+    $("navItems").replaceChildren(...parts);
   }
+
+  $("navItems").addEventListener("click", e => {
+    const ed = e.target.closest("[data-catedit]");
+    if (ed) { e.stopPropagation(); openCatDialog(ed.dataset.catedit); return; }
+    if (e.target.closest("[data-newcat]")) { openCatDialog(null); return; }
+    const b = e.target.closest("[data-view]");
+    if (b) { UI.view = b.dataset.view; render(); }
+  });
+
+  // ---------- Tag-filterknapper ----------
+  function renderTagRow() {
+    const row = $("tagRow");
+    const anyTags = D.links.some(l => l.tags && l.tags.length);
+    const filtersOn = !!(UI.q || UI.tags.size || UI.view !== ALL);
+    if (!anyTags && !filtersOn) { row.hidden = true; row.replaceChildren(); return; }
+    row.hidden = false;
+
+    // Tallene viser hvor mange genveje tagget giver med de øvrige filtre (kategori, søgning)
+    const stats = tagStats(D.links.filter(l => matches(l, { skipTags: true })));
+    UI.tags.forEach(k => { if (!stats.some(s => s.key === k)) stats.push({ key: k, name: displayTag(k), n: 0 }); });
+    stats.sort((a, b) => (UI.tags.has(b.key) - UI.tags.has(a.key)) || (b.n - a.n) || a.name.localeCompare(b.name, "da"));
+
+    const LIM = 18, shown = UI.allTags ? stats : stats.slice(0, LIM);
+    fill(row,
+      el("span", { class: "lab" }, "Tags"),
+      shown.length ? shown.map(t => {
+        const col = tagColor(t.name), on = UI.tags.has(t.key);
+        return el("button", { class: "chip" + (on ? " on" : "") + (col ? " tc" : ""), style: col ? { "--tc": col } : null, "data-tag": t.key, title: on ? "Fjern filter" : "Vis kun genveje med dette tag" },
+          col ? el("i", { class: "tdot", style: { "--c": col } }) : null, t.name, el("span", { class: "ct" }, t.n));
+      }) : el("span", { class: "hintline" }, anyTags ? "Ingen tags blandt de viste genveje" : "Ingen tags endnu"),
+      stats.length > LIM ? el("button", { class: "chip ghost", "data-more": "1" }, UI.allTags ? "Vis færre" : `+ ${stats.length - LIM} flere`) : null,
+      UI.tags.size > 1 ? el("button", { class: "chip ghost", "data-andor": "1", title: "Skift mellem: genveje med ALLE de valgte tags / genveje med MINDST ÉT af dem" },
+        UI.tagMode === "and" ? "Match: alle valgte" : "Match: mindst ét") : null,
+      anyTags ? el("button", { class: "chip ghost", "data-tagmgr": "1", title: "Giv tags farver, omdøb eller slet dem" }, "🎨") : null,
+      filtersOn ? el("button", { class: "chip ghost", "data-clear": "1" }, "✕ Ryd filtre") : null);
+  }
+
+  $("tagRow").addEventListener("click", e => {
+    const t = e.target.closest("[data-tag]");
+    if (t) { toggleTag(t.dataset.tag); return; }
+    if (e.target.closest("[data-more]")) { UI.allTags = !UI.allTags; render(); return; }
+    if (e.target.closest("[data-andor]")) { UI.tagMode = UI.tagMode === "and" ? "or" : "and"; render(); return; }
+    if (e.target.closest("[data-tagmgr]")) { openTagManager(); return; }
+    if (e.target.closest("[data-clear]")) clearFilters();
+  });
 
   // ---------- Hovedvisning ----------
   const grid = $("grid");
 
-  function renderGrid() {
-    const list = visible();
-    firstUrl = list.length ? list[0].url : null;
-
-    $("status").textContent = list.length === links.length
-      ? `${links.length} genveje`
-      : `Viser ${list.length} af ${links.length} genveje`;
-
-    if (!list.length) {
-      grid.innerHTML = `<div class="empty">${
-        !links.length ? "Ingen genveje endnu – klik på <b>+ Tilføj genvej</b>."
-        : active === FAV && !query ? "Ingen favoritter endnu – klik på ★ ud for et link."
-        : "Ingen genveje matcher."}</div>`;
-      return;
-    }
-
-    let html = "";
-    let isFirst = true;
-    categories().forEach(c => {
-      const items = list.filter(l => l.category === c);
-      if (!items.length) return;
-      html += `<div class="card"><h2>${esc(c)}</h2>`;
-      items.forEach(l => {
-        const i = links.indexOf(l);
-        const on = favs.has(l.url);
-        html += `<div class="row${isFirst && query ? " first" : ""}">
-          <a href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.url)}">
-            <span class="icon">${esc(l.icon || "🔗")}</span>
-            <span class="txt"><span class="name">${esc(l.name)}</span>
-              <span class="sub">${esc(l.note || shortUrl(l.url))}</span></span>
-          </a>
-          <button class="act edit" data-i="${i}" title="Redigér">✎</button>
-          <button class="act star${on ? " on" : ""}" data-i="${i}"
-            title="${on ? "Fjern fra favoritter" : "Tilføj til favoritter"}">${on ? "★" : "☆"}</button>
-        </div>`;
-        isFirst = false;
-      });
-      html += "</div>";
-    });
-    grid.innerHTML = html;
+  function rowEl(l) {
+    const sel = UI.select, on = UI.sel.has(l.id), href = hrefOf(l), web = isWebHref(href);
+    const app = l.desktop ? officeApp(l.url) : null;
+    return el("div", { class: "row" + (sel ? " selmode" : "") + (on ? " picked" : "") + (UI.q && !sel && firstLink === l ? " first" : ""), "data-id": l.id },
+      sel ? el("span", { class: "pickbox" }, on ? "☑" : "☐") : null,
+      el("a", { href, target: web ? "_blank" : null, rel: web ? "noopener" : null, title: l.url },
+        el("span", { class: "icon" }, l.icon || "🔗"),
+        el("span", { class: "txt" },
+          el("span", { class: "name" }, l.name, app ? el("span", { class: "badge", title: `Åbnes i ${APPNAME[app]}` }, "↗ " + APPNAME[app]) : null),
+          el("span", { class: "sub" }, l.note || shortUrl(l.url)),
+          l.tags && l.tags.length ? el("span", { class: "rtags" }, l.tags.map(t => {
+            const col = tagColor(t);
+            return el("span", { class: "tchip" + (col ? " tc" : "") + (UI.tags.has(lc(t)) ? " on" : ""), style: col ? { "--tc": col } : null, "data-tag": lc(t), title: "Filtrér på dette tag" }, t);
+          })) : null)),
+      sel ? null : el("button", { class: "act", title: "Redigér", "data-edit": l.id }, "✎"),
+      sel ? null : el("button", { class: "act star" + (l.favorite ? " on" : ""), "data-star": l.id,
+        title: l.favorite ? "Fjern fra favoritter" : "Tilføj til favoritter" }, l.favorite ? "★" : "☆"));
   }
 
-  function render() { renderNav(); renderGrid(); }
+  function renderGrid() {
+    const list = D.links.filter(l => matches(l));
+    const groups = [
+      ...D.categories.map(c => ({ c, items: list.filter(l => l.category === c.id) })),
+      { c: null, items: list.filter(l => !catOf(l)) }
+    ].filter(g => g.items.length);
+    UI.order = groups.flatMap(g => g.items.map(l => l.id));
+    firstLink = UI.order.length ? linkById(UI.order[0]) : null;
 
-  // ---------- Dialog: tilføj / redigér ----------
-  const dlg = $("dlg");
-  let editIndex = -1;
+    $("status").textContent = (list.length === D.links.length
+      ? plural(D.links.length, "genvej", "genveje")
+      : `Viser ${list.length} af ${D.links.length} genveje`) + (UI.select ? " · Klik for at markere, Shift+klik for et helt område" : "");
 
-  $("emojis").innerHTML = EMOJIS.map(e => `<button type="button" title="Brug ${e}">${e}</button>`).join("");
-  $("emojis").addEventListener("click", e => {
-    const b = e.target.closest("button");
-    if (b) $("fIcon").value = b.textContent;
+    if (!list.length) {
+      grid.replaceChildren(el("div", { class: "empty" },
+        !D.links.length ? "Ingen genveje endnu – klik på “+ Tilføj genvej” eller “📂 Tilføj fra mappe”."
+        : UI.view === FAV && !UI.q && !UI.tags.size ? "Ingen favoritter endnu – klik på ☆ ud for et link."
+        : "Ingen genveje matcher. ",
+        D.links.length && !(UI.view === FAV && !UI.q && !UI.tags.size) ? el("button", { class: "btn", "data-clear": "1" }, "Ryd filtre") : null));
+      return;
+    }
+    grid.replaceChildren(...groups.map(({ c, items }) =>
+      el("section", { class: "card", style: { "--c": c ? c.color : "var(--border)" } },
+        el("div", { class: "chead" },
+          el("span", { class: "cicon" }, c ? c.icon : "•"),
+          el("h2", {}, c ? c.name : "Uden kategori"),
+          el("span", { class: "ccount" }, items.length),
+          c ? el("button", { class: "act", title: "Redigér kategori", "data-catedit": c.id }, "✎") : null),
+        items.map(rowEl))));
+  }
+
+  function render() { renderNav(); renderTagRow(); renderGrid(); renderSelBar(); $("selBtn").classList.toggle("on", UI.select); }
+
+  grid.addEventListener("click", e => {
+    const t = e.target;
+    if (t.closest("[data-clear]")) { clearFilters(); return; }
+    const row = t.closest(".row");
+    if (UI.select && row) { e.preventDefault(); pick(row.dataset.id, e.shiftKey); return; }
+    const tag = t.closest("[data-tag]");
+    if (tag) { e.preventDefault(); e.stopPropagation(); toggleTag(tag.dataset.tag); return; }
+    const ce = t.closest("[data-catedit]");
+    if (ce) { openCatDialog(ce.dataset.catedit); return; }
+    const ed = t.closest("[data-edit]");
+    if (ed) { e.preventDefault(); openLinkDialog(ed.dataset.edit); return; }
+    const st = t.closest("[data-star]");
+    if (st) {
+      e.preventDefault();
+      const l = linkById(st.dataset.star);
+      if (l.favorite) delete l.favorite; else l.favorite = true;
+      persist(); render();
+    }
   });
 
-  function openDialog(i, preset = {}) {
-    editIndex = i;
-    const cur = i >= 0 ? links[i]
-      : { category: (active !== ALL && active !== FAV) ? active : "", ...preset };
-    $("dlgTitle").textContent = i >= 0 ? "Redigér genvej" : "Tilføj genvej";
+  // ---------- Markér flere ----------
+  function pick(id, shift) {
+    if (shift && UI.last && UI.order.includes(UI.last) && UI.order.includes(id)) {
+      const a = UI.order.indexOf(UI.last), b = UI.order.indexOf(id);
+      UI.order.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(x => UI.sel.add(x));
+    } else if (UI.sel.has(id)) UI.sel.delete(id);
+    else UI.sel.add(id);
+    UI.last = id;
+    render();
+  }
+  function enterSelect() { UI.select = true; UI.sel.clear(); UI.last = null; render(); }
+  function exitSelect() { UI.select = false; UI.sel.clear(); UI.last = null; render(); }
+  $("selBtn").addEventListener("click", () => UI.select ? exitSelect() : enterSelect());
+  const selectedLinks = () => D.links.filter(l => UI.sel.has(l.id));
+
+  function renderSelBar() {
+    const bar = $("selbar");
+    document.body.classList.toggle("selecting", UI.select);
+    if (!UI.select) { bar.hidden = true; return; }
+    bar.hidden = false;
+    // Fjern markeringer på genveje der ikke findes mere
+    [...UI.sel].forEach(id => { if (!linkById(id)) UI.sel.delete(id); });
+    const ls = selectedLinks(), n = ls.length;
+    const hiddenN = ls.filter(l => !UI.order.includes(l.id)).length;
+    const allFav = n > 0 && ls.every(l => l.favorite);
+    const b = (label, fn, cls = "btn", needs = true) => el("button", { type: "button", class: cls, disabled: needs && !n, onClick: fn }, label);
+    fill(bar,
+      el("b", {}, `${n} valgt`),
+      hiddenN ? el("span", { class: "muted" }, `(${hiddenN} skjult af filtre)`) : null,
+      b(`Vælg alle viste (${UI.order.length})`, () => { UI.order.forEach(id => UI.sel.add(id)); render(); }, "btn", false),
+      b("Ryd valg", () => { UI.sel.clear(); UI.last = null; render(); }),
+      el("span", { class: "sep" }),
+      b("🏷 Tilføj tag…", bulkAddTags, "btn primary"),
+      b("Fjern tag…", bulkRemoveTags),
+      b("📁 Flyt til kategori…", bulkMove),
+      b(allFav ? "☆ Fjern favorit" : "★ Gør til favorit", bulkFav),
+      b("🗑 Slet…", bulkDelete, "btn danger"),
+      el("span", { class: "spacer" }),
+      b("Færdig", exitSelect, "btn", false));
+  }
+
+  function bulkAddTags() {
+    const ls = selectedLinks();
+    updateTagList();
+    const ti = tagInput([]);
+    modal(`Tilføj tags til ${plural(ls.length, "genvej", "genveje")}`,
+      [field("Tags", ti, "Tryk Enter efter hvert tag. Eksisterende tags foreslås."), el("small", {}, namesOf(ls))],
+      [el("span", { class: "spacer" }), cancelBtn(), el("button", { type: "submit", class: "btn primary" }, "Tilføj")],
+      { onSubmit: d => {
+        const tags = ti.get();
+        if (!tags.length) { toast("Skriv mindst ét tag"); ti.input.focus(); return; }
+        ls.forEach(l => {
+          l.tags = l.tags || [];
+          tags.forEach(t => { if (!l.tags.some(x => lc(x) === lc(t))) l.tags.push(t); });
+        });
+        persist(); d.close(); render();
+        toast(`Tilføjede ${tags.join(", ")} til ${plural(ls.length, "genvej", "genveje")}`);
+      } });
+    ti.input.focus();
+  }
+
+  function bulkRemoveTags() {
+    const ls = selectedLinks(), stats = tagStats(ls);
+    if (!stats.length) { toast("De valgte genveje har ingen tags"); return; }
+    const pickSet = new Set(), box = el("div", { class: "chips" });
+    const draw = () => box.replaceChildren(...stats.map(t =>
+      el("button", { type: "button", class: "chip" + (pickSet.has(t.key) ? " on" : ""), onClick: () => { pickSet.has(t.key) ? pickSet.delete(t.key) : pickSet.add(t.key); draw(); } },
+        t.name, el("span", { class: "ct" }, `${t.n}/${ls.length}`))));
+    draw();
+    modal(`Fjern tags fra ${plural(ls.length, "genvej", "genveje")}`,
+      [el("p", { class: "muted" }, "Vælg de tags, der skal fjernes. Tallet viser, hvor mange af de valgte genveje der har tagget."), box],
+      [el("span", { class: "spacer" }), cancelBtn(), el("button", { type: "submit", class: "btn primary" }, "Fjern valgte tags")],
+      { onSubmit: d => {
+        if (!pickSet.size) { toast("Vælg mindst ét tag"); return; }
+        ls.forEach(l => {
+          if (!l.tags) return;
+          l.tags = l.tags.filter(t => !pickSet.has(lc(t)));
+          if (!l.tags.length) delete l.tags;
+        });
+        persist(); d.close(); render();
+        toast(`Fjernede ${plural(pickSet.size, "tag", "tags")} fra de valgte genveje`);
+      } });
+  }
+
+  function bulkMove() {
+    const ls = selectedLinks();
+    const same = ls.every(l => l.category === ls[0].category) ? ls[0].category : "";
+    const sel = el("select", {});
+    fillCatSelect(sel, same);
+    bindCatSelect(sel);
+    modal(`Flyt ${plural(ls.length, "genvej", "genveje")} til kategori`,
+      [field("Kategori", sel), el("small", {}, namesOf(ls))],
+      [el("span", { class: "spacer" }), cancelBtn(), el("button", { type: "submit", class: "btn primary" }, "Flyt")],
+      { onSubmit: d => {
+        const v = sel.value === "__new" ? "" : sel.value;
+        ls.forEach(l => { l.category = v; });
+        persist(); d.close(); render();
+        const c = catById(v);
+        toast(`${plural(ls.length, "genvej", "genveje")} flyttet til “${c ? c.name : "Uden kategori"}”`);
+      } });
+  }
+
+  function bulkFav() {
+    const ls = selectedLinks(), to = !ls.every(l => l.favorite);
+    ls.forEach(l => { if (to) l.favorite = true; else delete l.favorite; });
+    persist(); render();
+    toast(to ? `${plural(ls.length, "genvej", "genveje")} gjort til favorit` : `${plural(ls.length, "genvej", "genveje")} fjernet fra favoritter`);
+  }
+
+  function bulkDelete() {
+    const ls = selectedLinks();
+    if (!confirm(`Slet ${plural(ls.length, "genvej", "genveje")}?\n\n${namesOf(ls)}`)) return;
+    const ids = new Set(ls.map(l => l.id));
+    D.links = D.links.filter(l => !ids.has(l.id));
+    UI.sel.clear();
+    persist(); render();
+    toast(`${plural(ls.length, "genvej", "genveje")} slettet`);
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape" || !UI.select || document.querySelector("dialog[open]")) return;
+    const tg = lc(e.target.tagName);
+    if (tg === "input" || tg === "textarea" || tg === "select") return;
+    exitSelect();
+  });
+
+  // ---------- Tag-felt med knapper ----------
+  function tagInput(initial) {
+    let tags = cleanTags(initial);
+    const inp = el("input", { list: "tagList", placeholder: "Skriv et tag og tryk Enter", autocomplete: "off" });
+    const wrap = el("div", { class: "taginput" });
+    const draw = () => wrap.replaceChildren(...tags.map(t => {
+      const col = tagColor(t);
+      return el("span", { class: "chip on" + (col ? " tc" : ""), style: col ? { "--tc": col } : null },
+        t, el("b", { class: "x", title: "Fjern", onClick: () => { tags = tags.filter(x => x !== t); draw(); inp.focus(); } }, "×"));
+    }), inp);
+    const add = (v, focus = true) => {
+      String(v).split(",").forEach(part => {
+        let x = part.trim();
+        if (!x) return;
+        x = canonTag(x);
+        if (!tags.some(t => lc(t) === lc(x))) tags.push(x);
+      });
+      inp.value = "";
+      draw();
+      if (focus) inp.focus();
+    };
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(inp.value); }
+      else if (e.key === "Backspace" && !inp.value && tags.length) { tags.pop(); draw(); inp.focus(); }
+    });
+    wrap.addEventListener("click", e => { if (e.target === wrap) inp.focus(); });
+    draw();
+    wrap.get = () => { if (inp.value.trim()) add(inp.value, false); return tags.slice(); };
+    wrap.input = inp;
+    return wrap;
+  }
+
+  // ---------- Kategorier ----------
+  function fillCatSelect(sel, value) {
+    sel.replaceChildren(
+      el("option", { value: "" }, "Uden kategori"),
+      ...D.categories.map(c => el("option", { value: c.id }, c.icon + " " + c.name)),
+      el("option", { value: "__new" }, "+ Ny kategori…"));
+    sel.value = value && catById(value) ? value : "";
+    sel.dataset.prev = sel.value;
+  }
+  function bindCatSelect(sel) {
+    sel.addEventListener("change", () => {
+      if (sel.value !== "__new") { sel.dataset.prev = sel.value; return; }
+      sel.value = sel.dataset.prev || "";
+      openCatDialog(null, c => fillCatSelect(sel, c.id));
+    });
+  }
+
+  function openCatDialog(id, onSaved) {
+    const c = id ? catById(id) : null;
+    const m = c ? { ...c } : { name: "", icon: "📁", color: COLORS[D.categories.length % COLORS.length] };
+    const name = el("input", { value: m.name, placeholder: "Fx Power BI, Økonomi, WEEE", autocomplete: "off" });
+    const icon = el("input", { value: m.icon, maxlength: "8", autocomplete: "off" });
+    const ems = el("div", { class: "emojis" }, EMOJIS.map(e => el("button", { type: "button", onClick: () => { icon.value = e; } }, e)));
+    const sw = el("div", { class: "swatches" });
+    const drawSw = () => sw.replaceChildren(...COLORS.map(col =>
+      el("button", { type: "button", class: "sw" + (m.color === col ? " on" : ""), style: { "--c": col }, title: col, onClick: () => { m.color = col; drawSw(); } })));
+    drawSw();
+
+    const btns = [];
+    if (c) {
+      btns.push(el("button", { type: "button", class: "btn danger", onClick: e => {
+        const n = D.links.filter(l => l.category === c.id).length;
+        if (!confirm(`Slet kategorien “${c.name}”?` + (n ? `\n${plural(n, "genvej", "genveje")} flyttes til “Uden kategori” – de bliver ikke slettet.` : ""))) return;
+        D.links.forEach(l => { if (l.category === c.id) l.category = ""; });
+        D.categories = D.categories.filter(x => x !== c);
+        if (UI.view === c.id) UI.view = ALL;
+        persist(); e.target.closest("dialog").close(); render();
+        toast(`Kategorien “${c.name}” slettet`);
+      } }, "Slet"));
+      const mv = dir => () => {
+        const i = D.categories.indexOf(c), j = i + dir;
+        if (j < 0 || j >= D.categories.length) return;
+        [D.categories[i], D.categories[j]] = [D.categories[j], D.categories[i]];
+        persist(); render();
+      };
+      btns.push(el("button", { type: "button", class: "btn", title: "Flyt op i rækkefølgen", onClick: mv(-1) }, "↑"),
+                el("button", { type: "button", class: "btn", title: "Flyt ned i rækkefølgen", onClick: mv(1) }, "↓"));
+    }
+    btns.push(el("span", { class: "spacer" }), cancelBtn(), el("button", { type: "submit", class: "btn primary" }, c ? "Gem" : "Opret"));
+
+    modal(c ? "Redigér kategori" : "Ny kategori",
+      [el("div", { class: "two" }, field("Navn *", name), field("Ikon", icon)), ems, field("Farve", sw)],
+      btns,
+      { onSubmit: d => {
+        const n = name.value.trim();
+        if (!n) { toast("Giv kategorien et navn"); name.focus(); return; }
+        if (D.categories.some(x => x !== c && lc(x.name) === lc(n))) { toast("Der findes allerede en kategori med det navn"); name.focus(); return; }
+        const obj = c || { id: "c-" + uid() };
+        Object.assign(obj, { name: n, icon: icon.value.trim() || "📁", color: m.color });
+        if (!c) D.categories.push(obj);
+        persist(); d.close(); render();
+        toast(c ? `“${n}” gemt` : `Kategorien “${n}” oprettet`);
+        if (onSaved) onSaved(obj);
+      } });
+    name.focus();
+  }
+
+  // ---------- Tags: farver, omdøb, slet ----------
+  function renameTag(key, newName) {
+    const val = String(newName || "").trim();
+    if (!val) return false;
+    const existing = tagStats(D.links).find(t => t.key === lc(val) && t.key !== key);
+    const target = existing ? existing.name : val;
+    D.links.forEach(l => {
+      if (!l.tags || !l.tags.some(t => lc(t) === key)) return;
+      const out = [];
+      l.tags.forEach(t => { const x = lc(t) === key ? target : t; if (!out.some(y => lc(y) === lc(x))) out.push(x); });
+      l.tags = out;
+    });
+    const tk = lc(target);
+    if (tk !== key && D.tagColors[key]) { if (!D.tagColors[tk]) D.tagColors[tk] = D.tagColors[key]; delete D.tagColors[key]; }
+    if (UI.tags.has(key)) { UI.tags.delete(key); UI.tags.add(tk); }
+    persist(); render();
+    toast(existing ? `Slået sammen med “${target}”` : `Omdøbt til “${target}”`);
+    return true;
+  }
+  function deleteTag(key) {
+    D.links.forEach(l => {
+      if (!l.tags) return;
+      l.tags = l.tags.filter(t => lc(t) !== key);
+      if (!l.tags.length) delete l.tags;
+    });
+    delete D.tagColors[key];
+    UI.tags.delete(key);
+    persist(); render();
+  }
+
+  function openTagManager() {
+    const box = el("div", { class: "tmlist" });
+    const draw = () => {
+      const stats = tagStats(D.links);
+      box.replaceChildren(...(stats.length ? stats.map(t => {
+        const col = D.tagColors[t.key] || null;
+        const setCol = v => { if (v) D.tagColors[t.key] = v; else delete D.tagColors[t.key]; persist(); draw(); render(); };
+        return el("div", { class: "tm-r" },
+          el("span", { class: "nm" }, el("span", { class: "chip" + (col ? " tc" : ""), style: col ? { "--tc": col } : null },
+            col ? el("i", { class: "tdot", style: { "--c": col } }) : null, t.name)),
+          el("span", { class: "n", title: "Antal genveje" }, String(t.n)),
+          el("span", { class: "swrow" },
+            el("button", { type: "button", class: "sw none" + (!col ? " on" : ""), title: "Ingen farve", onClick: () => setCol(null) }, "×"),
+            COLORS.map(cc => el("button", { type: "button", class: "sw" + (col === cc ? " on" : ""), style: { "--c": cc }, title: cc, onClick: () => setCol(cc) }))),
+          el("button", { type: "button", class: "act show", title: "Omdøb (eller slå sammen med et andet tag)", onClick: () => {
+            const nn = prompt(`Nyt navn til tagget “${t.name}”:\n(Giver du det samme navn som et andet tag, bliver de slået sammen.)`, t.name);
+            if (nn != null && nn.trim() && nn.trim() !== t.name && renameTag(t.key, nn)) draw();
+          } }, "✎"),
+          el("button", { type: "button", class: "act show", title: "Slet tagget fra alle genveje", onClick: () => {
+            if (!confirm(`Fjern tagget “${t.name}” fra ${plural(t.n, "genvej", "genveje")}?`)) return;
+            deleteTag(t.key); draw();
+            toast(`Tagget “${t.name}” slettet`);
+          } }, "🗑"));
+      }) : [el("p", { class: "muted" }, "Ingen tags endnu. Tilføj tags til dine genveje, så dukker de op her.")]));
+    };
+    draw();
+    modal("Tags og farver",
+      [el("p", { class: "muted" }, "Vælg en farve til hvert tag – den vises på filterknapperne og ved genvejene. Med ✎ omdøber du et tag; giver du det samme navn som et andet tag, bliver de slået sammen."), box],
+      [el("span", { class: "spacer" }), el("button", { type: "submit", class: "btn primary" }, "Luk")],
+      { wide: true });
+  }
+  $("tagMgrBtn").addEventListener("click", openTagManager);
+
+  // ---------- Dialog: tilføj / redigér genvej ----------
+  const dlg = $("dlg");
+  let editId = null, tagBox = null;
+  bindCatSelect($("fCat"));
+
+  $("emojis").replaceChildren(...EMOJIS.map(e => el("button", { type: "button", title: "Brug " + e }, e)));
+  $("emojis").addEventListener("click", e => { const b = e.target.closest("button"); if (b) $("fIcon").value = b.textContent; });
+
+  function updateDesk() {
+    const app = officeApp(normalizeUrl($("fUrl").value));
+    $("fDeskRow").hidden = !app;
+    if (app) $("fDeskLabel").textContent = `Åbn i ${APPNAME[app]} i stedet for browseren`;
+  }
+
+  function openLinkDialog(id, preset = {}) {
+    editId = id || null;
+    const cur = id ? linkById(id) : { category: catById(UI.view) ? UI.view : "", favorite: UI.view === FAV, ...preset };
+    $("dlgTitle").textContent = id ? "Redigér genvej" : "Tilføj genvej";
     $("fUrl").value  = cur.url || "";
     $("fName").value = cur.name || "";
-    $("fCat").value  = cur.category || "";
     $("fIcon").value = cur.icon || "";
-    $("fTags").value = (cur.tags || []).join(", ");
     $("fNote").value = cur.note || "";
-    $("fFav").checked = i >= 0 ? favs.has(cur.url) : active === FAV;
-    $("fDel").hidden = i < 0;
-    $("catList").innerHTML = categories().map(c => `<option value="${esc(c)}">`).join("");
+    $("fFav").checked = !!cur.favorite;
+    $("fDesk").checked = !!cur.desktop;
+    fillCatSelect($("fCat"), cur.category);
+    updateTagList();
+    tagBox = tagInput(cur.tags || []);
+    $("fTagsBox").replaceChildren(tagBox);
+    $("fDel").hidden = !id;
+    updateDesk();
     dlg.showModal();
     (cur.url ? $("fName") : $("fUrl")).focus();
   }
@@ -547,11 +1164,14 @@ window.LINKS = [
   function fillFromUrl() {
     const u = normalizeUrl($("fUrl").value);
     $("fUrl").value = u;
-    if (!u) return;
-    if (!$("fName").value.trim()) $("fName").value = guessName(u);
-    if (!$("fIcon").value.trim()) $("fIcon").value = guessIcon(u);
+    if (u) {
+      if (!$("fName").value.trim()) $("fName").value = guessName(u);
+      if (!$("fIcon").value.trim()) $("fIcon").value = guessIcon(u);
+    }
+    updateDesk();
   }
   $("fUrl").addEventListener("change", fillFromUrl);
+  $("fUrl").addEventListener("input", updateDesk);
   $("fUrl").addEventListener("paste", () => setTimeout(fillFromUrl, 0));
 
   $("form").addEventListener("submit", e => {
@@ -559,117 +1179,111 @@ window.LINKS = [
     const url = normalizeUrl($("fUrl").value);
     const name = $("fName").value.trim();
     if (!url || !name) return;
+    if (D.links.some(l => l.url === url && l.id !== editId) &&
+        !confirm("Der findes allerede en genvej med denne adresse. Gem alligevel?")) return;
 
-    const item = { category: $("fCat").value.trim() || "Andet", name, url };
-    const icon = $("fIcon").value.trim();
-    const tags = $("fTags").value.split(",").map(t => t.trim()).filter(Boolean);
-    const note = $("fNote").value.trim();
+    const cat = $("fCat").value === "__new" ? "" : $("fCat").value;
+    const item = { id: editId || "l-" + uid(), name, url, category: cat };
+    const icon = $("fIcon").value.trim(), note = $("fNote").value.trim(), tags = tagBox.get();
     if (icon) item.icon = icon;
     if (tags.length) item.tags = tags;
     if (note) item.note = note;
+    if ($("fFav").checked) item.favorite = true;
+    if ($("fDesk").checked && officeApp(url)) item.desktop = true;
 
-    if (editIndex >= 0) {
-      const oldUrl = links[editIndex].url;
-      if (oldUrl !== url) favs.delete(oldUrl);
-      links[editIndex] = item;
+    if (editId) {
+      const i = D.links.findIndex(l => l.id === editId);
+      if (i >= 0) D.links[i] = item; else D.links.push(item);
     } else {
-      // Indsæt efter sidste link i samme kategori, så den eksporterede fil forbliver ordnet
-      const last = links.map(l => l.category).lastIndexOf(item.category);
-      links.splice(last >= 0 ? last + 1 : links.length, 0, item);
+      D.links.push(item);
     }
-    $("fFav").checked ? favs.add(url) : favs.delete(url);
-
-    persist();
-    dlg.close();
-    render();
-    toast(editIndex >= 0 ? `“${name}” opdateret` : `“${name}” tilføjet`);
+    persist(); dlg.close(); render();
+    toast(editId ? `“${name}” opdateret` : `“${name}” tilføjet`);
   });
 
   $("fCancel").addEventListener("click", () => dlg.close());
-
   $("fDel").addEventListener("click", () => {
-    if (editIndex < 0) return;
-    const l = links[editIndex];
-    if (!confirm(`Slet “${l.name}”?`)) return;
-    links.splice(editIndex, 1);
-    if (!links.some(x => x.url === l.url)) favs.delete(l.url);
-    persist();
-    dlg.close();
-    render();
+    const l = linkById(editId);
+    if (!l || !confirm(`Slet “${l.name}”?`)) return;
+    D.links = D.links.filter(x => x !== l);
+    UI.sel.delete(l.id);
+    persist(); dlg.close(); render();
     toast(`“${l.name}” slettet`);
   });
 
-  $("addBtn").addEventListener("click", () => openDialog(-1));
+  $("addBtn").addEventListener("click", () => openLinkDialog(null));
 
-  // ---------- Dialog: tilføj filer fra mappe ----------
-  const FOLDERS_KEY = "genveje.folders";
+  // ---------- Dialog: tilføj filer og mapper ----------
   const fdlg = $("fdlg");
   const SHOW_MAX = 500;
-  let picked = [];          // [{ key, rel, name, dir }] – dir=true for mapper, key unik pr. post
+  let picked = [];   // [{ key, rel, name, dir, root }]
   let rootName = "";
   let shown = [];
-  const selected = new Set();
+  let fdTags = null;
+  const fsel = new Set();
+  bindCatSelect($("fdCat"));
 
-  const folderMap = () => { try { return JSON.parse(store.get(FOLDERS_KEY) || "{}"); } catch (e) { return {}; } };
-  const baseOf = () => $("fdPath").value.trim().replace(/^"(.*)"$/, "$1").trim().replace(/[\\/]+$/, "");
+  const baseOf = () => $("fdPath").value.trim().replace(/^["'“”]+|["'“”]+$/g, "").trim().replace(/[\\/]+$/, "");
   const buildUrl = rel => normalizeUrl(baseOf() + (rel ? "\\" + rel.replace(/\//g, "\\") : ""));
   const entryUrl = f => buildUrl(f.rel) + (f.dir ? "/" : "");
-  const byKey = key => picked.find(f => f.key === key);
 
   function openFolderDialog() {
-    picked = []; rootName = ""; shown = []; selected.clear();
+    picked = []; rootName = ""; shown = []; fsel.clear();
+    $("fdStep2").hidden = true;
+    $("fdAll").hidden = true;
+    $("fdWarn").hidden = true;
+    $("fdInfo").textContent = "";
+    $("fdTip").hidden = false;
+    $("fdPick").textContent = "1. Vælg mappe…";
+    $("fdPick").classList.add("primary");
     $("fdPath").value = "";
-    $("fdCat").value = (active !== ALL && active !== FAV) ? active : "";
-    $("fdPaths").innerHTML = Object.values(folderMap()).map(p => `<option value="${esc(p)}">`).join("");
-    $("catList").innerHTML = categories().map(c => `<option value="${esc(c)}">`).join("");
-    $("fdInfo").textContent = "Browseren spørger måske om du vil “uploade” filerne – intet sendes nogen steder, siden læser kun filnavnene.";
     $("fdFilter").value = "";
     $("fdType").value = "all";
-    ["fdTools", "fdList", "fdAll", "fdWarn"].forEach(id => $(id).hidden = true);
-    updateAddBtn();
+    $("fdPaths").replaceChildren(...Object.values(folderMap()).map(p => el("option", { value: p })));
+    fillCatSelect($("fdCat"), catById(UI.view) ? UI.view : "");
+    updateTagList();
+    fdTags = tagInput([]);
+    $("fdTagsBox").replaceChildren(fdTags);
+    updateFdAdd();
     fdlg.showModal();
-    $("fdPath").focus();
+    $("fdPick").focus();
   }
 
   function checkPath() {
     const last = baseOf().split(/[\\/]/).filter(Boolean).pop() || "";
     const w = $("fdWarn");
-    if (rootName && last && last.toLowerCase() !== rootName.toLowerCase()) {
+    if (rootName && last && lc(last) !== lc(rootName)) {
       w.textContent = `⚠️ Du har valgt mappen “${rootName}”, men stien slutter med “${last}”. Tjek at stien peger på den samme mappe – ellers virker linkene ikke.`;
       w.hidden = false;
-    } else {
-      w.hidden = true;
-    }
+    } else w.hidden = true;
   }
 
-  function updateAddBtn() {
-    $("fdAdd").disabled = selected.size === 0;
-    $("fdAdd").textContent = selected.size ? `Tilføj valgte (${selected.size})` : "Tilføj valgte";
+  function updateFdAdd() {
+    $("fdAdd").disabled = fsel.size === 0;
+    $("fdAdd").textContent = fsel.size ? `Tilføj valgte (${fsel.size})` : "Tilføj valgte";
   }
 
   function renderFileList() {
-    const terms = $("fdFilter").value.toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = lc($("fdFilter").value).split(/\s+/).filter(Boolean);
     const type = $("fdType").value;
     shown = picked.filter(f =>
       (type === "all" || (type === "dirs") === f.dir) &&
-      terms.every(t => (f.rel || f.name).toLowerCase().includes(t)));
-    const existing = baseOf() ? new Set(links.map(l => l.url)) : new Set();
+      terms.every(t => lc(f.rel || f.name).includes(t)));
+    const existing = baseOf() ? new Set(D.links.map(l => l.url)) : new Set();
 
-    let html = "";
-    shown.slice(0, SHOW_MAX).forEach(f => {
+    const rows = shown.slice(0, SHOW_MAX).map(f => {
       const exists = existing.has(entryUrl(f));
       const parent = f.rel.includes("/") ? f.rel.slice(0, f.rel.lastIndexOf("/")) : "";
       const sub = f.root ? "den valgte mappe" : parent;
-      html += `<label class="frow${f.dir ? " dir" : ""}${exists ? " exists" : ""}">
-        <input type="checkbox" data-key="${esc(f.key)}"${selected.has(f.key) ? " checked" : ""}${exists ? " disabled" : ""}>
-        <span class="icon">${f.dir ? "📂" : guessIcon(f.name)}</span>
-        <span class="txt"><span class="name">${esc(f.name)}</span>${sub ? `<span class="sub">${esc(sub)}</span>` : ""}</span>
-        ${exists ? "<em>findes allerede</em>" : ""}
-      </label>`;
+      return el("label", { class: "frow" + (f.dir ? " dir" : "") + (exists ? " exists" : "") },
+        el("input", { type: "checkbox", "data-key": f.key, checked: fsel.has(f.key), disabled: exists }),
+        el("span", { class: "icon" }, f.dir ? "📂" : guessIcon(f.name)),
+        el("span", { class: "txt" }, el("span", { class: "name" }, f.name), sub ? el("span", { class: "sub" }, sub) : null),
+        exists ? el("em", {}, "findes allerede") : null);
     });
-    if (!shown.length) html = `<div class="fmore">Intet matcher.</div>`;
-    else if (shown.length > SHOW_MAX) html += `<div class="fmore">Viser ${SHOW_MAX} af ${shown.length} – filtrér for at se resten.</div>`;
-    $("fdList").innerHTML = html;
+    if (!shown.length) rows.push(el("div", { class: "fmore" }, "Intet matcher."));
+    else if (shown.length > SHOW_MAX) rows.push(el("div", { class: "fmore" }, `Viser ${SHOW_MAX} af ${shown.length} – filtrér for at se resten.`));
+    $("fdList").replaceChildren(...rows);
     $("fdAll").textContent = `Vælg alle viste (${shown.length})`;
   }
 
@@ -697,24 +1311,33 @@ window.LINKS = [
       }
     });
     const dirEntries = [...dirs].map(rel => ({ rel, name: rel.split("/").pop(), dir: true }));
-
     const sortRel = (a, b) => a.rel.localeCompare(b.rel, "da");
     picked = [
       { rel: "", name: rootName, dir: true, root: true },
       ...dirEntries.sort(sortRel),
       ...fileEntries.sort(sortRel)
     ].map(f => ({ ...f, key: (f.dir ? "d:" : "f:") + f.rel }));
-    selected.clear();
+    fsel.clear();
 
-    const remembered = folderMap()[rootName.toLowerCase()];
-    if (!baseOf() && remembered) $("fdPath").value = remembered;
+    const remembered = folderMap()[lc(rootName)];
+    if (remembered) {
+      $("fdPath").value = remembered;
+      $("fdPathHint").textContent = "Husket fra sidst du brugte mappen – ret den kun, hvis mappen er flyttet.";
+    } else {
+      $("fdPath").value = "";
+      $("fdPathHint").textContent = "Første gang med denne mappe: markér den i Stifinder → Ctrl+Shift+C (eller Shift+højreklik → Kopiér som sti) og indsæt her. Stien huskes til næste gang.";
+    }
 
-    $("fdInfo").textContent = `📁 ${rootName} – ${fileEntries.length} filer, ${dirEntries.length} undermapper`;
-    ["fdTools", "fdList", "fdAll"].forEach(id => $(id).hidden = false);
+    $("fdInfo").textContent = `📁 ${rootName} – ${plural(fileEntries.length, "fil", "filer")}, ${plural(dirEntries.length, "undermappe", "undermapper")}`;
+    $("fdPick").textContent = "Vælg en anden mappe…";
+    $("fdPick").classList.remove("primary");
+    $("fdTip").hidden = true;
+    $("fdStep2").hidden = false;
+    $("fdAll").hidden = false;
     checkPath();
     renderFileList();
-    updateAddBtn();
-    $("fdFilter").focus();
+    updateFdAdd();
+    (remembered ? $("fdFilter") : $("fdPath")).focus();
   });
 
   $("fdFilter").addEventListener("input", renderFileList);
@@ -724,127 +1347,119 @@ window.LINKS = [
   $("fdList").addEventListener("change", e => {
     const cb = e.target.closest("input[type=checkbox]");
     if (!cb) return;
-    cb.checked ? selected.add(cb.dataset.key) : selected.delete(cb.dataset.key);
-    updateAddBtn();
+    cb.checked ? fsel.add(cb.dataset.key) : fsel.delete(cb.dataset.key);
+    updateFdAdd();
   });
 
   $("fdAll").addEventListener("click", () => {
-    const existing = new Set(links.map(l => l.url));
-    const candidates = shown.filter(f => !existing.has(entryUrl(f)));
-    const allOn = candidates.length && candidates.every(f => selected.has(f.key));
-    candidates.forEach(f => allOn ? selected.delete(f.key) : selected.add(f.key));
+    const existing = new Set(D.links.map(l => l.url));
+    const cand = shown.filter(f => !existing.has(entryUrl(f)));
+    const allOn = cand.length && cand.every(f => fsel.has(f.key));
+    cand.forEach(f => allOn ? fsel.delete(f.key) : fsel.add(f.key));
     renderFileList();
-    updateAddBtn();
+    updateFdAdd();
   });
 
   $("fform").addEventListener("submit", e => {
     e.preventDefault();
-    const base = baseOf();
-    if (!base || !selected.size) return;
+    if (!fsel.size) return;
+    const base = baseOf(), w = $("fdWarn");
+    if (!base) { w.textContent = "⚠️ Indsæt mappens fulde sti i trin 2."; w.hidden = false; $("fdPath").focus(); return; }
     if (!/^([a-zA-Z]:|\\\\)/.test(base)) {
-      $("fdWarn").textContent = "⚠️ Stien skal starte med et drevbogstav (C:\\…) eller \\\\server\\…";
-      $("fdWarn").hidden = false;
-      return;
+      w.textContent = "⚠️ Stien skal starte med et drevbogstav (C:\\…) eller \\\\server\\…";
+      w.hidden = false; $("fdPath").focus(); return;
     }
-    const cat = $("fdCat").value.trim() || "Andet";
-    const existing = new Set(links.map(l => l.url));
-    let pos = links.map(l => l.category).lastIndexOf(cat);
-    pos = pos >= 0 ? pos + 1 : links.length;
-
+    const cat = $("fdCat").value === "__new" ? "" : $("fdCat").value;
+    const tags = fdTags.get();
+    const existing = new Set(D.links.map(l => l.url));
     let nFiles = 0, nDirs = 0;
-    picked.filter(f => selected.has(f.key)).forEach(f => {
+    picked.filter(f => fsel.has(f.key)).forEach(f => {
       const url = entryUrl(f);
       if (existing.has(url)) return;
-      const name = f.dir ? f.name : (f.name.replace(/\.[^.]+$/, "") || f.name);
-      links.splice(pos++, 0, { category: cat, name, url, icon: f.dir ? "📂" : guessIcon(url) });
+      const item = { id: "l-" + uid(), name: f.dir ? f.name : (f.name.replace(/\.[^.]+$/, "") || f.name), url, category: cat, icon: f.dir ? "📂" : guessIcon(url) };
+      if (tags.length) item.tags = tags.slice();
+      D.links.push(item);
       existing.add(url);
       f.dir ? nDirs++ : nFiles++;
     });
 
     const map = folderMap();
-    map[rootName.toLowerCase()] = base;
-    store.set(FOLDERS_KEY, JSON.stringify(map));
+    map[lc(rootName)] = base;
+    store.set(K.folders, JSON.stringify(map));
 
-    persist();
-    fdlg.close();
-    render();
+    persist(); fdlg.close(); render();
     const parts = [];
-    if (nFiles) parts.push(`${nFiles} ${nFiles === 1 ? "fil" : "filer"}`);
-    if (nDirs) parts.push(`${nDirs} ${nDirs === 1 ? "mappe" : "mapper"}`);
-    toast(`${parts.join(" og ") || "Intet nyt"} tilføjet til “${cat}”`);
+    if (nFiles) parts.push(plural(nFiles, "fil", "filer"));
+    if (nDirs) parts.push(plural(nDirs, "mappe", "mapper"));
+    const c = catById(cat);
+    toast(`${parts.join(" og ") || "Intet nyt"} tilføjet til “${c ? c.name : "Uden kategori"}”`);
   });
 
-  // ---------- Eksport / import ----------
-  function download(content, filename, type) {
-    const blob = new Blob([content], { type: type + ";charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  }
-
-  // Genvejene med den aktuelle favoritstatus skrevet ind i hvert link
-  function linksWithFavs() {
-    return links.map(l => {
-      const o = { ...l };
-      if (favs.has(l.url)) o.favorite = true; else delete o.favorite;
-      return o;
-    });
-  }
-
-  function markSaved() {
-    store.del(DIRTY_KEY);
-    $("dirty").classList.remove("on");
+  // ---------- Eksport / backup / import ----------
+  function exportObject() {
+    return { version: 2, categories: D.categories, tagColors: D.tagColors, links: D.links };
   }
 
   $("exportBtn").addEventListener("click", () => {
-    const data = linksWithFavs();
-    const rows = data.map(o => "  " + JSON.stringify(o).replace(/<\//g, "<\\/"));
-    const script = '<script id="linksData">\nwindow.LINKS = [\n' + rows.join(",\n") + "\n];\n<\/script>";
+    const obj = exportObject();
+    const j = o => JSON.stringify(o).replace(/<\//g, "<\\/");
+    const script = '<script id="linksData">\nwindow.GENVEJE = {\n  "version": 2,\n  "categories": [\n' +
+      obj.categories.map(c => "    " + j(c)).join(",\n") + '\n  ],\n  "tagColors": ' + j(obj.tagColors) +
+      ',\n  "links": [\n' + obj.links.map(l => "    " + j(l)).join(",\n") + "\n  ]\n};\n<\/script>";
     const html = PAGE_TEMPLATE.replace(/<script id="linksData">[\s\S]*?<\/script>/, () => script);
     download(html, "Genveje.html", "text/html");
-
-    // Den gemte kopi indeholder nu præcis disse genveje – undgå at den spørger når den åbnes
-    store.set(BASE_KEY, JSON.stringify(data));
+    // Den gemte kopi indeholder nu præcis disse data – undgå at den spørger når den åbnes
+    store.set(K.base, JSON.stringify(obj));
     markSaved();
     toast("Genveje.html hentet – den indeholder alle dine genveje og kan bruges som backup eller på en anden pc.", 6000);
   });
 
-  // Backup af kun genvejene (+ huskede mappestier) – kan importeres i nye versioner af siden
   $("backupBtn").addEventListener("click", () => {
     const now = new Date();
     const stamp = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
-    const backup = {
-      format: "genveje-backup",
-      version: 1,
-      exported: now.toISOString(),
-      links: linksWithFavs(),
-      folders: folderMap()
-    };
+    const backup = { format: "genveje-backup", ...exportObject(), exported: now.toISOString(), folders: folderMap() };
     download(JSON.stringify(backup, null, 2), `Genveje-backup-${stamp}.json`, "application/json");
     markSaved();
-    toast(`Backup hentet: Genveje-backup-${stamp}.json (${links.length} genveje)`, 5000);
+    toast(`Backup hentet: Genveje-backup-${stamp}.json (${plural(D.links.length, "genvej", "genveje")}, ${plural(D.categories.length, "kategori", "kategorier")})`, 5000);
   });
-
-  // ----- Import -----
-  const idlg = $("idlg");
-  let pending = null;   // { links, folders, fileName }
 
   function readImport(text) {
     const m = text.match(/<script id="linksData">([\s\S]*?)<\/script>/);   // en gemt Genveje.html
     if (m) text = m[1];
     let parsed = null;
     try { parsed = JSON.parse(text); } catch (err) {
-      try { const w = {}; new Function("window", text)(w); parsed = w.LINKS; } catch (err2) { parsed = null; }
+      try { const w = {}; new Function("window", text)(w); parsed = w.GENVEJE || w.LINKS; } catch (err2) { parsed = null; }
     }
-    if (Array.isArray(parsed)) return { links: clean(parsed), folders: null };
-    if (parsed && Array.isArray(parsed.links)) {
-      return { links: clean(parsed.links), folders: (parsed.folders && typeof parsed.folders === "object") ? parsed.folders : null };
+    return normalizeData(parsed);
+  }
+
+  function doImport(mode, data) {
+    let added = 0;
+    if (mode === "replace") {
+      D = { links: data.links, categories: data.categories, tagColors: data.tagColors };
+      added = D.links.length;
+      UI.view = ALL; UI.tags.clear(); UI.sel.clear();
+    } else {
+      // Kategorier slås sammen på navn, genveje på adresse
+      const byName = new Map(D.categories.map(c => [lc(c.name), c]));
+      const idMap = new Map();
+      data.categories.forEach(c => {
+        let ex = byName.get(lc(c.name));
+        if (!ex) { ex = { ...c, id: catById(c.id) ? "c-" + uid() : c.id }; D.categories.push(ex); byName.set(lc(ex.name), ex); }
+        idMap.set(c.id, ex.id);
+      });
+      const urls = new Set(D.links.map(l => l.url)), ids = new Set(D.links.map(l => l.id));
+      data.links.forEach(l => {
+        if (urls.has(l.url)) return;
+        const o = { ...l, category: l.category ? (idMap.get(l.category) || "") : "" };
+        if (ids.has(o.id)) o.id = "l-" + uid();
+        D.links.push(o); urls.add(o.url); ids.add(o.id); added++;
+      });
+      for (const [k, v] of Object.entries(data.tagColors)) if (!D.tagColors[k]) D.tagColors[k] = v;
     }
-    return { links: [], folders: null };
+    if (data.folders) store.set(K.folders, JSON.stringify({ ...folderMap(), ...data.folders }));
+    persist(); render();
+    toast(mode === "replace" ? `${plural(added, "genvej", "genveje")} importeret` : `${plural(added, "ny genvej", "nye genveje")} tilføjet`);
   }
 
   $("importBtn").addEventListener("click", () => $("importFile").click());
@@ -852,88 +1467,38 @@ window.LINKS = [
     const f = e.target.files[0];
     e.target.value = "";
     if (!f) return;
-    const result = readImport(await f.text());
-    if (!result.links.length) { toast("⚠️ Kunne ikke finde nogen genveje i filen."); return; }
-
-    pending = { ...result, fileName: f.name };
-    const urls = new Set(links.map(l => l.url));
-    const newCount = result.links.filter(l => !urls.has(l.url)).length;
-    $("iText").innerHTML =
-      `<b>${esc(f.name)}</b> indeholder <b>${result.links.length}</b> genveje, ` +
-      `heraf <b>${newCount}</b> du ikke har i forvejen. Du har nu <b>${links.length}</b> genveje.`;
-    $("iMerge").textContent = `Tilføj kun nye (${newCount})`;
-    $("iMerge").disabled = newCount === 0;
-    $("iReplace").textContent = `Erstat alle (${result.links.length})`;
-    idlg.showModal();
+    const data = readImport(await f.text());
+    if (!data || !data.links.length) { toast("⚠️ Kunne ikke finde nogen genveje i filen."); return; }
+    const urls = new Set(D.links.map(l => l.url));
+    const newCount = data.links.filter(l => !urls.has(l.url)).length;
+    modal("Importér genveje", [
+      el("p", {}, el("b", {}, f.name), ` indeholder ${plural(data.links.length, "genvej", "genveje")} og ${plural(data.categories.length, "kategori", "kategorier")}, heraf `,
+        el("b", {}, newCount), ` ${newCount === 1 ? "genvej" : "genveje"} du ikke har i forvejen. Du har nu ${plural(D.links.length, "genvej", "genveje")}.`),
+      el("small", {}, "“Tilføj kun nye” beholder alt det, du har, og tilføjer genvejene fra filen, du ikke har i forvejen (sammenlignet på adresse). Kategorier med samme navn slås sammen.")
+    ], [
+      cancelBtn(),
+      el("span", { class: "spacer" }),
+      el("button", { type: "button", class: "btn", disabled: newCount === 0, onClick: ev => { doImport("merge", data); ev.target.closest("dialog").close(); } }, `Tilføj kun nye (${newCount})`),
+      el("button", { type: "submit", class: "btn primary" }, `Erstat alle (${data.links.length})`)
+    ], { onSubmit: d => { doImport("replace", data); d.close(); } });
   });
 
-  function finishImport(mode) {
-    if (!pending) return;
-    let added = 0;
-    if (mode === "replace") {
-      links = pending.links;
-      favs = new Set(links.filter(l => l.favorite).map(l => l.url));
-      added = links.length;
-    } else {
-      const urls = new Set(links.map(l => l.url));
-      pending.links.forEach(l => {
-        if (urls.has(l.url)) return;
-        const pos = links.map(x => x.category).lastIndexOf(l.category);
-        links.splice(pos >= 0 ? pos + 1 : links.length, 0, l);
-        if (l.favorite) favs.add(l.url);
-        urls.add(l.url);
-        added++;
-      });
-    }
-    if (pending.folders) {
-      store.set(FOLDERS_KEY, JSON.stringify({ ...folderMap(), ...pending.folders }));
-    }
-    pending = null;
-    idlg.close();
-    persist();
-    render();
-    toast(mode === "replace" ? `${added} genveje importeret` : `${added} nye genveje tilføjet`);
-  }
-
-  $("iReplace").addEventListener("click", () => finishImport("replace"));
-  $("iMerge").addEventListener("click", () => finishImport("merge"));
-  $("iCancel").addEventListener("click", () => { pending = null; idlg.close(); });
-
-  // ---------- Hændelser ----------
-  $("navItems").addEventListener("click", e => {
-    const b = e.target.closest("button[data-cat]");
-    if (!b) return;
-    active = b.dataset.cat;
-    render();
-  });
-
-  grid.addEventListener("click", e => {
-    const b = e.target.closest(".act");
-    if (!b) return;
-    e.preventDefault();
-    const i = Number(b.dataset.i);
-    if (b.classList.contains("edit")) { openDialog(i); return; }
-    const url = links[i].url;
-    favs.has(url) ? favs.delete(url) : favs.add(url);
-    saveFavs();
-    render();
-  });
-
+  // ---------- Søgning og tastatur ----------
   const search = $("search");
-  search.addEventListener("input", () => { query = search.value.trim(); renderGrid(); });
+  search.addEventListener("input", () => { UI.q = search.value.trim(); renderTagRow(); renderGrid(); });
   search.addEventListener("keydown", e => {
-    if (e.key === "Enter" && firstUrl) window.open(firstUrl, "_blank", "noopener");
-    if (e.key === "Escape") { search.value = ""; query = ""; renderGrid(); }
+    if (e.key === "Enter" && firstLink) openHref(hrefOf(firstLink));
+    if (e.key === "Escape") { search.value = ""; UI.q = ""; render(); }
   });
-
   document.addEventListener("keydown", e => {
-    if (e.key === "/" && !dlg.open && !fdlg.open && !idlg.open && document.activeElement !== search) {
-      e.preventDefault();
-      search.focus();
-    }
+    if (e.key !== "/" || document.querySelector("dialog[open]")) return;
+    const tg = lc(document.activeElement && document.activeElement.tagName);
+    if (tg === "input" || tg === "textarea" || tg === "select") return;
+    e.preventDefault();
+    search.focus();
   });
 
-  // Træk et link (fx fra adresselinjen) ind på siden
+  // ---------- Træk et link (fx fra adresselinjen) ind på siden ----------
   let internalDrag = false;
   grid.addEventListener("dragstart", () => { internalDrag = true; });
   document.addEventListener("dragend", () => { internalDrag = false; });
@@ -941,7 +1506,7 @@ window.LINKS = [
   document.addEventListener("drop", e => {
     e.preventDefault();
     if (internalDrag) { internalDrag = false; return; }
-    if (fdlg.open || idlg.open) return;
+    if (document.querySelector("dialog[open]:not(#dlg)")) return;
     const dt = e.dataTransfer;
     const moz = (dt.getData("text/x-moz-url") || "").split("\n");       // Firefox: url + sidetitel
     const raw = moz[0] || (dt.getData("text/uri-list") || "").split("\n").find(x => x && !x.startsWith("#"))
@@ -949,9 +1514,9 @@ window.LINKS = [
     const url = normalizeUrl(raw);
     if (/^(https?|file):/i.test(url)) {
       if (dlg.open) { $("fUrl").value = url; fillFromUrl(); return; }
-      openDialog(-1, { url, name: (moz[1] || "").trim() || guessName(url), icon: guessIcon(url) });
+      openLinkDialog(null, { url, name: (moz[1] || "").trim() || guessName(url), icon: guessIcon(url) });
     } else if (dt.files && dt.files.length) {
-      toast("Browseren kan ikke se stien på filer trukket fra Stifinder. Højreklik på filen → Kopiér som sti, og indsæt i stedet.", 6000);
+      toast("Browseren oplyser ikke stien på filer trukket fra Stifinder. Markér filen → Ctrl+Shift+C, og indsæt stien i “+ Tilføj genvej” i stedet.", 7000);
     }
   });
 
