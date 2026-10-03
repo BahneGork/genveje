@@ -123,10 +123,10 @@ body.selecting main { padding-bottom:90px; }
 kbd { border:1px solid var(--border); border-radius:4px; padding:0 5px; font-size:11px; }
 
 /* ---- Markér-bjælke ---- */
-#selbar { position:fixed; left:250px; right:0; bottom:0; background:var(--panel); border-top:2px solid var(--accent);
-          padding:10px 20px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; z-index:5; box-shadow:0 -4px 20px rgba(0,0,0,.12); }
-#selbar .btn { padding:6px 10px; font-size:13px; }
-#selbar .sep { width:1px; height:24px; background:var(--border); margin:0 4px; }
+.selbar { background:var(--panel); border-top:2px solid var(--accent); padding:10px 20px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+#selbar { position:fixed; left:250px; right:0; bottom:0; z-index:5; box-shadow:0 -4px 20px rgba(0,0,0,.12); }
+.selbar .btn { padding:6px 10px; font-size:13px; }
+.selbar .sep { width:1px; height:24px; background:var(--border); margin:0 4px; }
 .muted { color:var(--muted); font-size:13px; }
 .spacer { flex:1; }
 
@@ -194,6 +194,60 @@ label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text)
 #toast.on { opacity:1; }
 body.selecting #toast { bottom:80px; }
 
+/* ---- Vejledning ---- */
+#docs { max-width:940px; padding-bottom:40px; }
+.dhead h1 { font-size:24px; margin:4px 0 6px; }
+.dhead p { color:var(--muted); margin:0 0 16px; line-height:1.5; }
+.toc { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:2px 18px; background:var(--panel);
+       border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:28px; font-size:14px; }
+.toc a { color:var(--accent); text-decoration:none; padding:3px 0; }
+.toc a:hover { text-decoration:underline; }
+.dsec { margin:0 0 36px; line-height:1.6; font-size:15px; scroll-margin-top:16px; }
+.dsec h2 { font-size:19px; margin:0 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.dsec h3 { font-size:15px; margin:18px 0 4px; }
+.dsec p { margin:6px 0; }
+.dsec ul, .dsec ol { margin:6px 0; padding-left:24px; }
+.dsec li { margin:4px 0; }
+.dsec a { color:var(--accent); }
+.shot { margin:16px 0 8px; }
+.shotbox { border:1px solid var(--border); border-radius:10px; background:var(--bg); padding:18px; pointer-events:none; user-select:none;
+           overflow:hidden; display:flex; flex-direction:column; gap:12px; }
+.shot figcaption { font-size:12px; color:var(--muted); margin-top:6px; font-style:italic; }
+.co { display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px; border-radius:50%; background:#e3008c;
+      color:#fff; font-size:12px; font-weight:700; flex-shrink:0; margin:0 4px; box-shadow:0 0 0 2px var(--panel); font-style:normal; }
+.legend { counter-reset:lg; list-style:none; padding-left:0 !important; font-size:14px; }
+.legend li { counter-increment:lg; display:flex; gap:8px; align-items:flex-start; }
+.legend li::before { content:counter(lg); display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px; flex-shrink:0;
+      border-radius:50%; background:#e3008c; color:#fff; font-size:12px; font-weight:700; margin-top:1px; }
+.tipbox, .warnbox { border-radius:8px; padding:10px 14px; margin:12px 0; font-size:14px; line-height:1.55; }
+.tipbox { background:var(--hover); border-left:4px solid var(--accent); }
+.warnbox { background:var(--warn-bg); color:var(--warn-text); border-left:4px solid #c19c00; }
+.dgrid2 { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+.dcol { flex:1; min-width:300px; display:flex; flex-direction:column; gap:8px; }
+.fakenav { background:var(--side); color:var(--side-text); border-radius:8px; padding:12px 0; width:230px; flex-shrink:0; }
+.fnh { color:#fff; font-weight:600; font-size:16px; padding:0 18px 10px; display:flex; align-items:center; }
+.fsearch { flex:1; min-width:140px; padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:var(--panel); color:var(--muted); }
+.fakedlg { background:var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.18);
+           padding:16px 18px; max-width:480px; display:flex; flex-direction:column; gap:10px; }
+.fakedlg.wide { max-width:680px; }
+.fdh { font-weight:600; font-size:16px; }
+.ff { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.fl { font-size:12px; color:var(--muted); display:flex; align-items:center; }
+.fi { border:1px solid var(--border); border-radius:6px; padding:6px 9px; background:var(--bg); font-size:14px; min-height:34px;
+      display:flex; align-items:center; gap:5px; flex-wrap:wrap; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fi.ph, .fi .ph { color:var(--muted); }
+.fhint { font-size:12px; color:var(--muted); }
+.fcheck { font-size:14px; display:flex; align-items:center; }
+.fbox { color:var(--accent); font-size:16px; }
+.fakedlg .flist { max-height:none; }
+.selbar.demo { border:1px solid var(--border); border-top:2px solid var(--accent); border-radius:8px; }
+table.keys { border-collapse:collapse; font-size:14px; margin:8px 0; }
+table.keys td, table.keys th { border-bottom:1px solid var(--border); padding:7px 12px 7px 0; vertical-align:top; text-align:left; }
+table.savetbl td:first-child { white-space:nowrap; }
+dl.faq dt { font-weight:600; margin-top:12px; }
+dl.faq dd { margin:2px 0 0 0; }
+.dfoot { color:var(--muted); font-size:12px; border-top:1px solid var(--border); padding-top:10px; }
+
 @media (max-width:760px) {
   nav { width:190px; }
   #selbar { left:190px; }
@@ -215,7 +269,7 @@ body.selecting #toast { bottom:80px; }
   </div>
 </nav>
 
-<main>
+<main id="main">
   <div id="banner"></div>
   <div class="top">
     <input id="search" type="search" placeholder="Søg efter genvej… (tryk / for at søge)" autocomplete="off">
@@ -227,13 +281,14 @@ body.selecting #toast { bottom:80px; }
   <div id="tagRow" class="chips" hidden></div>
   <div id="status"></div>
   <div id="grid"></div>
-  <div class="hint">
+  <div id="docs" hidden></div>
+  <div class="hint" id="hintBar">
     <kbd>/</kbd> søg &nbsp; <kbd>Enter</kbd> åbn første resultat &nbsp; <kbd>Esc</kbd> ryd søgning / afslut markering &nbsp;
     ★ favorit &nbsp; ✎ redigér &nbsp; Klik på et tag for at filtrere &nbsp; Træk et link fra adresselinjen ind på siden for at tilføje det
   </div>
 </main>
 
-<div id="selbar" hidden></div>
+<div id="selbar" class="selbar" hidden></div>
 
 <datalist id="tagList"></datalist>
 
@@ -371,7 +426,8 @@ window.GENVEJE = {
     state: "genveje.state", base: "genveje.base", theme: "genveje.theme", dirty: "genveje.dirty",
     folders: "genveje.folders", legacyLinks: "genveje.links", legacyFavs: "genveje.favorites"
   };
-  const ALL = "__all", FAV = "__fav", NONE = "__none";
+  const APP_VERSION = "2.1";
+  const ALL = "__all", FAV = "__fav", NONE = "__none", DOCS = "__docs";
   const COLORS = ["#0078d4","#107c10","#d83b01","#b4009e","#5c2d91","#008272","#c50f1f","#986f0b","#4f6bed","#69797e"];
   const EMOJIS = ["📊","📁","📂","📗","📘","📙","📕","📄","⚙️","📧","📋","♻️","🔗","⭐","🛠️","💰","🚚","👥","🏭","📅"];
   const APPNAME = { "ms-excel":"Excel", "ms-word":"Word", "ms-powerpoint":"PowerPoint" };
@@ -710,6 +766,7 @@ window.GENVEJE = {
     const parts = [
       item(ALL, "📚", "Alle", D.links.length),
       item(FAV, "⭐", "Favoritter", count(l => l.favorite)),
+      item(DOCS, "📖", "Vejledning", null),
       el("div", { class: "navsec" }, el("span", {}, "Kategorier"), el("button", { class: "navadd", title: "Ny kategori", "data-newcat": "1" }, "+"))
     ];
     D.categories.forEach(c => parts.push(item(c.id, c.icon, c.name, count(l => l.category === c.id), c.color, true)));
@@ -817,7 +874,19 @@ window.GENVEJE = {
         items.map(rowEl))));
   }
 
-  function render() { renderNav(); renderTagRow(); renderGrid(); renderSelBar(); $("selBtn").classList.toggle("on", UI.select); }
+  function render() {
+    const docs = UI.view === DOCS;
+    if (docs && UI.select) { UI.select = false; UI.sel.clear(); UI.last = null; }
+    renderNav();
+    $("docs").hidden = !docs;
+    $("status").hidden = $("grid").hidden = $("hintBar").hidden = docs;
+    if (docs) { $("tagRow").hidden = true; renderDocs(); }
+    else { renderTagRow(); renderGrid(); }
+    renderSelBar();
+    $("selBtn").classList.toggle("on", UI.select);
+  }
+  // Fra vejledningen tilbage til genvejene
+  const leaveDocs = () => { if (UI.view === DOCS) { UI.view = ALL; render(); $("main").scrollTop = 0; } };
 
   grid.addEventListener("click", e => {
     const t = e.target;
@@ -849,7 +918,7 @@ window.GENVEJE = {
     UI.last = id;
     render();
   }
-  function enterSelect() { UI.select = true; UI.sel.clear(); UI.last = null; render(); }
+  function enterSelect() { leaveDocs(); UI.select = true; UI.sel.clear(); UI.last = null; render(); }
   function exitSelect() { UI.select = false; UI.sel.clear(); UI.last = null; render(); }
   $("selBtn").addEventListener("click", () => UI.select ? exitSelect() : enterSelect());
   const selectedLinks = () => D.links.filter(l => UI.sel.has(l.id));
@@ -1142,6 +1211,7 @@ window.GENVEJE = {
   }
 
   function openLinkDialog(id, preset = {}) {
+    leaveDocs();
     editId = id || null;
     const cur = id ? linkById(id) : { category: catById(UI.view) ? UI.view : "", favorite: UI.view === FAV, ...preset };
     $("dlgTitle").textContent = id ? "Redigér genvej" : "Tilføj genvej";
@@ -1228,6 +1298,7 @@ window.GENVEJE = {
   const entryUrl = f => buildUrl(f.rel) + (f.dir ? "/" : "");
 
   function openFolderDialog() {
+    leaveDocs();
     picked = []; rootName = ""; shown = []; fsel.clear();
     $("fdStep2").hidden = true;
     $("fdAll").hidden = true;
@@ -1483,9 +1554,360 @@ window.GENVEJE = {
     ], { onSubmit: d => { doImport("replace", data); d.close(); } });
   });
 
+  // ---------- Vejledning ----------
+  // Billederne er tegnet med sidens egne elementer, så de altid passer til den aktuelle version og tema
+  let docsBuilt = false;
+  const P = (...k) => el("p", {}, k);
+  const B = t => el("b", {}, t);
+  const KB = t => el("kbd", {}, t);
+  const UL = items => el("ul", {}, items.map(i => el("li", {}, i)));
+  const OL = items => el("ol", {}, items.map(i => el("li", {}, i)));
+  const H3 = t => el("h3", {}, t);
+  const tip = (...k) => el("div", { class: "tipbox" }, k);
+  const warnbox = (...k) => el("div", { class: "warnbox" }, k);
+  const co = n => el("span", { class: "co" }, String(n));
+  const legend = items => el("ol", { class: "legend" }, items.map(t => el("li", {}, t)));
+  const shot = (caption, ...content) => el("figure", { class: "shot" },
+    el("div", { class: "shotbox", "aria-hidden": "true" }, content), el("figcaption", {}, caption));
+  const sec = (id, title, ...k) => el("section", { class: "dsec", id: "doc-" + id }, el("h2", {}, title), k);
+
+  const demoRow = (icon, name, sub, opt = {}) =>
+    el("div", { class: "row" + (opt.picked ? " picked" : "") + (opt.first ? " first" : "") },
+      opt.pick != null ? el("span", { class: "pickbox" }, opt.picked ? "☑" : "☐") : null,
+      el("a", {},
+        el("span", { class: "icon" }, icon),
+        el("span", { class: "txt" },
+          el("span", { class: "name" }, name, opt.badge ? el("span", { class: "badge" }, opt.badge) : null),
+          el("span", { class: "sub" }, sub),
+          opt.tags ? el("span", { class: "rtags" }, opt.tags.map(t =>
+            el("span", { class: "tchip" + (t.c ? " tc" : "") + (t.on ? " on" : ""), style: t.c ? { "--tc": t.c } : null }, t.n))) : null)),
+      opt.pick != null ? null : el("span", { class: "act show" }, "✎"),
+      opt.pick != null ? null : el("span", { class: "act star show" + (opt.fav ? " on" : "") }, opt.fav ? "★" : "☆"),
+      opt.co || null);
+  const demoCard = (icon, name, color, rows, callout) =>
+    el("section", { class: "card", style: { "--c": color } },
+      el("div", { class: "chead" }, el("span", { class: "cicon" }, icon), el("h2", {}, name), callout || null,
+        el("span", { class: "ccount" }, rows.length), el("span", { class: "act show" }, "✎")),
+      rows);
+  const demoChip = (name, n, on, color) =>
+    el("span", { class: "chip" + (on ? " on" : "") + (color ? " tc" : ""), style: color ? { "--tc": color } : null },
+      color ? el("i", { class: "tdot", style: { "--c": color } }) : null, name, n != null ? el("span", { class: "ct" }, n) : null);
+  const demoBtn = (t, cls = "btn") => el("span", { class: cls }, t);
+  const fakeField = (label, value, opt = {}) => el("div", { class: "ff" },
+    el("span", { class: "fl" }, label, opt.co || null),
+    el("div", { class: "fi" + (value ? "" : " ph") }, value || opt.ph || ""),
+    opt.hint ? el("span", { class: "fhint" }, opt.hint) : null);
+  const fakeDialog = (title, ...k) => el("div", { class: "fakedlg" }, el("div", { class: "fdh" }, title), k);
+  const navDemo = (icon, label, n, opt = {}) =>
+    el("div", { class: "navbtn" + (opt.active ? " active" : ""), style: opt.color ? { "--c": opt.color } : null },
+      el("span", { class: "nicon" }, icon), el("span", { class: "nlabel" }, label), n != null ? el("span", { class: "count" }, n) : null);
+
+  function buildDocs() {
+    const C1 = "#0078d4", C2 = "#d83b01", C3 = "#008272", T1 = "#107c10", T2 = "#b4009e";
+    const toc = [
+      ["start", "Kom godt i gang"], ["add", "Tilføj en genvej"], ["folder", "Tilføj filer og mapper fra en mappe"],
+      ["cats", "Kategorier"], ["tags", "Tags og filtre"], ["tagmgr", "Tags og farver"], ["fav", "Favoritter"],
+      ["select", "Markér flere og redigér samlet"], ["search", "Søgning og tastatur"], ["office", "Åbn Office-filer i skrivebordsprogrammet"],
+      ["local", "Lokale filer og netværksdrev"], ["save", "Gem, backup og nye versioner"], ["faq", "Spørgsmål og fejlfinding"], ["limits", "Det kan siden ikke"]
+    ];
+
+    return [
+      el("div", { class: "dhead" },
+        el("h1", {}, "📖 Vejledning"),
+        el("p", {}, `Sådan bruger du Genveje. Version ${APP_VERSION}. Billederne er tegnet med sidens egne elementer, så de passer til den version og det tema, du bruger.`)),
+      el("nav", { class: "toc" }, toc.map(([id, t], i) => el("a", { href: "#doc-" + id, "data-doc": id }, `${i + 1}. ${t}`))),
+
+      sec("start", "1. Kom godt i gang",
+        P("Genveje er én HTML-fil, der samler links til hjemmesider, SharePoint, Power BI, filer og mapper ét sted. Der skal ikke installeres noget, og der er ingen server – siden kører helt i din browser (Edge eller Firefox)."),
+        shot("Siden består af venstremenuen, en værktøjslinje, tag-filtre og et kort for hver kategori.",
+          el("div", { class: "dgrid2" },
+            el("div", { class: "fakenav" },
+              el("div", { class: "fnh" }, "🏠 Genveje", co(1)),
+              navDemo("📚", "Alle", 9, { active: true }), navDemo("⭐", "Favoritter", 4), navDemo("📖", "Vejledning"),
+              el("div", { class: "navsec" }, el("span", {}, "Kategorier"), el("span", { class: "navadd" }, "+")),
+              navDemo("📊", "Power Platform", 3, { color: C1 }), navDemo("📧", "Microsoft 365", 3, { color: C2 }), navDemo("📁", "SharePoint", 3, { color: C3 })),
+            el("div", { class: "dcol" },
+              el("div", { class: "top" }, el("span", { class: "fsearch" }, "Søg efter genvej…"), co(2),
+                demoBtn("+ Tilføj genvej", "btn primary"), demoBtn("📂 Tilføj fra mappe"), demoBtn("☑ Markér"), demoBtn("🌓")),
+              el("div", { class: "chips" }, el("span", { class: "lab" }, "Tags"), co(3), demoChip("Rapportering", 4), demoChip("WEEE", 2, false, T1), demoChip("Økonomi", 3)),
+              demoCard("📊", "Power Platform", C1, [
+                demoRow("📊", "Power BI", "app.powerbi.com", { fav: true }),
+                demoRow("📗", "Budget 2026", "C:\\Users\\Michael\\Rapporter\\Budget 2026.xlsx", { tags: [{ n: "Rapportering" }, { n: "Økonomi" }] })
+              ], co(4))))),
+        legend([
+          "Venstremenuen: Alle genveje, Favoritter, denne vejledning og dine kategorier. Nederst ligger værktøjer til tags, backup og import.",
+          "Søgefeltet og knapperne til at tilføje genveje, markere flere og skifte mellem lyst og mørkt tema.",
+          "Tag-filtrene – klik på et tag for kun at se genveje med det.",
+          "Ét kort pr. kategori, med kategoriens farve øverst. Hold musen over en genvej for at se ✎ (redigér) og ☆ (favorit)."
+        ]),
+        H3("Hvor gemmes mine genveje?"),
+        P("Alt hvad du gør, gemmes ", B("automatisk og med det samme i browseren"), ". Selve filen Genveje.html ændres ikke af sig selv – browsere må ikke skrive i filer på din disk. Derfor er det en god idé ind imellem at gemme en kopi eller tage en backup. Det er forklaret under ",
+          el("a", { href: "#doc-save", "data-doc": "save" }, "Gem, backup og nye versioner"), ".")),
+
+      sec("add", "2. Tilføj en genvej",
+        OL([
+          ["Klik på ", B("+ Tilføj genvej"), "."],
+          "Indsæt en adresse eller filsti. Navn og ikon udfyldes automatisk ud fra adressen – du kan rette dem.",
+          "Vælg eventuelt kategori, tags og note, og klik Gem."
+        ]),
+        shot("Dialogen “Tilføj genvej”.",
+          fakeDialog("Tilføj genvej",
+            fakeField("Adresse eller filsti *", "file:///C:/Users/Michael/Rapporter/Budget%202026.xlsx", { co: co(1) }),
+            fakeField("Navn *", "Budget 2026"),
+            el("div", { class: "two" }, fakeField("Kategori", "📊 Power Platform ▾", { co: co(2) }), fakeField("Ikon", "📗")),
+            el("div", { class: "ff" }, el("span", { class: "fl" }, "Tags", co(3)),
+              el("div", { class: "fi" }, demoChip("Rapportering", null, true), demoChip("Økonomi", null, true), el("span", { class: "ph" }, "Skriv et tag og tryk Enter"))),
+            el("div", { class: "fcheck" }, "☑ Favorit", co(4)),
+            el("div", { class: "btns" }, el("span", { class: "spacer" }), demoBtn("Annuller"), demoBtn("Gem", "btn primary")))),
+        legend([
+          "Adressen. Indsætter du en Windows-sti som C:\\Users\\…\\fil.xlsx (også med anførselstegn), laver siden den selv om til et rigtigt fillink.",
+          "Kategorien. Nederst i listen ligger “+ Ny kategori…”, så du kan oprette en ny uden at lukke dialogen.",
+          "Tags – tryk Enter eller komma efter hvert tag. Se Tags og filtre.",
+          "Favorit – genvejen kommer også med under ⭐ Favoritter."
+        ]),
+        H3("Hvilke adresser kan jeg bruge?"),
+        UL([
+          [B("Webadresser"), " – https://… Skriver du www.…, tilføjes https:// automatisk."],
+          [B("SharePoint og OneDrive"), " – brug filens ⋯ → Kopiér link, eller adressen fra browserens adresselinje."],
+          [B("Filer på din pc"), " – markér filen i Stifinder og tryk ", KB("Ctrl+Shift+C"), " (Windows 11) eller hold Shift, højreklik og vælg “Kopiér som sti” (Windows 10). Indsæt i adressefeltet."],
+          [B("Netværksdrev"), " – stier som \\\\server\\share\\mappe\\fil.pdf virker på samme måde."],
+          [B("Mapper"), " – kopiér mappens sti på samme måde."]
+        ]),
+        H3("Træk et link ind på siden"),
+        P("Du kan trække et link – eller adressen fra browserens adresselinje – ind på siden. Så åbner “Tilføj genvej” med adressen udfyldt. Firefox sender også sidens titel med, som bliver foreslået som navn."),
+        warnbox(B("Filer fra Stifinder kan ikke trækkes ind med deres sti. "), "Når en fil trækkes ind på en webside, giver Edge kun siden filens navn og indhold – aldrig hvor den ligger. I Firefox er det ikke afprøvet; siden bruger stien, hvis browseren sender den med, og viser ellers en besked. Brug Ctrl+Shift+C i stedet."),
+        H3("Redigér og slet"),
+        P("Hold musen over en genvej og klik på ✎. I dialogen kan du rette alt og slette genvejen med Slet.")),
+
+      sec("folder", "3. Tilføj filer og mapper fra en mappe",
+        P("Med ", B("📂 Tilføj fra mappe"), " kan du tilføje mange filer og mapper på én gang."),
+        OL([
+          ["Klik ", B("1. Vælg mappe…"), " og vælg mappen i browserens dialog. Dialogen åbner der, hvor browseren sidst var – ofte Skrivebordet. Har du mappens sti i udklipsholderen, så klik i adresselinjen øverst i dialogen, tryk ", KB("Ctrl+V"), " og ", KB("Enter"), "."],
+          "Browseren spørger måske, om du vil “uploade” filerne. Intet sendes nogen steder – siden læser kun filnavnene på din pc.",
+          ["Første gang du bruger en mappe, skal du indsætte ", B("mappens fulde sti"), " i trin 2 (markér mappen i Stifinder → ", KB("Ctrl+Shift+C"), "). Stien huskes, så næste gang udfyldes den af sig selv."],
+          "Sæt flueben ved de filer og mapper, du vil have med. Brug filterfeltet og listen “Filer og mapper / Kun filer / Kun mapper” til at finde dem.",
+          ["Vælg kategori og eventuelt tags til dem alle, og klik ", B("Tilføj valgte"), "."]
+        ]),
+        shot("Mappedialogen efter at mappen “Rapporter” er valgt.",
+          fakeDialog("Tilføj filer og mapper",
+            el("div", { class: "pick" }, demoBtn("Vælg en anden mappe…"), el("span", {}, "📁 Rapporter – 3 filer, 2 undermapper"), co(1)),
+            fakeField("2. Mappens fulde sti *", "C:\\Users\\Michael\\Rapporter", { co: co(2), hint: "Husket fra sidst du brugte mappen – ret den kun, hvis mappen er flyttet." }),
+            el("div", { class: "flist" },
+              [["📂", "Rapporter", "den valgte mappe", false, true], ["📂", "WEEE", "", true, true], ["📗", "Budget 2026.xlsx", "", true, false], ["📕", "Q1 rapport.pdf", "WEEE", false, false, true]]
+                .map(([ic, n, s, chk, dir, ex]) => el("div", { class: "frow" + (dir ? " dir" : "") + (ex ? " exists" : "") },
+                  el("span", { class: "fbox" }, chk ? "☑" : "☐"), el("span", { class: "icon" }, ic),
+                  el("span", { class: "txt" }, el("span", { class: "name" }, n), s ? el("span", { class: "sub" }, s) : null),
+                  ex ? el("em", {}, "findes allerede") : null, ex ? co(3) : null))),
+            el("div", { class: "twoeq" }, fakeField("3. Kategori", "📁 SharePoint ▾", { co: co(4) }), fakeField("Tags til alle (valgfrit)", "", { ph: "Skriv et tag og tryk Enter" })),
+            el("div", { class: "btns" }, demoBtn("Vælg alle viste (4)"), el("span", { class: "spacer" }), demoBtn("Annuller"), demoBtn("Tilføj valgte (2)", "btn primary")))),
+        legend([
+          "Den valgte mappe og hvor mange filer og undermapper, den indeholder.",
+          "Mappens sti. Passer navnet ikke til den valgte mappe, viser siden en advarsel.",
+          "Filer og mapper, du allerede har som genvej, er grå og kan ikke vælges igen.",
+          "Kategori og tags gælder for alle de genveje, du tilføjer i denne omgang."
+        ]),
+        H3("Godt at vide"),
+        UL([
+          "Undermapper kommer med – både som mapper du kan tilføje, og med filerne i dem.",
+          "Tomme mapper vises ikke. Browseren lister kun filer, så siden finder mapperne gennem filerne i dem.",
+          "Office-låsefiler (~$…), skjulte filer, desktop.ini og Thumbs.db springes over.",
+          "Stien huskes efter mappens navn. Har du to forskellige mapper med samme navn, foreslås den sidst brugte sti – tjek den.",
+          "Meget store mapper (især på netværksdrev) kan tage et øjeblik at indlæse."
+        ]),
+        tip(B("Hvorfor skal jeg selv indsætte stien? "), "Browsere fortæller aldrig en webside, hvor en fil eller mappe ligger på din disk. Det er en sikkerhedsregel, så hjemmesider ikke kan se dit brugernavn og din mappestruktur. Siden kan kun se navnene inde i den mappe, du vælger.")),
+
+      sec("cats", "4. Kategorier",
+        P("Hver genvej kan høre til én kategori. Kategorierne vises i venstremenuen og som kort med hver sin farve."),
+        UL([
+          [B("Opret"), ": klik + ud for KATEGORIER i venstremenuen – eller vælg “+ Ny kategori…” i kategorilisten, når du tilføjer en genvej."],
+          [B("Redigér"), ": hold musen over kategorien i menuen og klik ✎, eller klik ✎ i kortets overskrift. Du kan ændre navn, ikon og farve."],
+          [B("Rækkefølge"), ": ↑ og ↓ i redigeringsdialogen flytter kategorien op og ned i menuen og på siden."],
+          [B("Slet"), ": genvejene i kategorien bliver ikke slettet – de flyttes til “Uden kategori”."],
+          [B("Vis kun én kategori"), ": klik på den i venstremenuen. Klik på 📚 Alle for at se alt igen."],
+          "“Uden kategori” vises i menuen, når der er genveje uden kategori."
+        ]),
+        shot("Redigering af en kategori.",
+          fakeDialog("Redigér kategori",
+            el("div", { class: "two" }, fakeField("Navn *", "Power Platform"), fakeField("Ikon", "📊")),
+            el("div", { class: "ff" }, el("span", { class: "fl" }, "Farve"),
+              el("div", { class: "swatches" }, COLORS.map((c, i) => el("span", { class: "sw" + (i === 0 ? " on" : ""), style: { "--c": c } })))),
+            el("div", { class: "btns" }, demoBtn("Slet", "btn danger"), demoBtn("↑"), demoBtn("↓"), co(1), el("span", { class: "spacer" }), demoBtn("Annuller"), demoBtn("Gem", "btn primary")))),
+        legend(["↑ og ↓ ændrer rækkefølgen med det samme – også før du klikker Gem."])),
+
+      sec("tags", "5. Tags og filtre",
+        P("Tags er nøgleord. En genvej har én kategori, men kan have så mange tags du vil – fx ", B("Rapportering"), ", ", B("Månedlig"), " og ", B("WEEE"), ". Tags gør det let at finde genveje på tværs af kategorier."),
+        shot("Tag-rækken med to tags valgt.",
+          el("div", { class: "chips" }, el("span", { class: "lab" }, "Tags"),
+            demoChip("Rapportering", 4, true), demoChip("WEEE", 2, true, T1), co(1), demoChip("Økonomi", 3), co(2), demoChip("Fragt", 1, false, T2),
+            demoChip("Match: alle valgte", null), co(3), demoChip("🎨", null), demoChip("✕ Ryd filtre", null), co(4))),
+        legend([
+          "Valgte tags er farvet ind og står først.",
+          "Tallet viser, hvor mange genveje du får, hvis du også vælger det tag – med den kategori og søgning, du har valgt.",
+          "Med flere tags valgt: “alle valgte” viser kun genveje, der har dem alle. Klik for at skifte til “mindst ét”, som viser genveje med bare ét af dem.",
+          "Fjerner alle filtre: tags, søgning og valgt kategori."
+        ]),
+        UL([
+          "Klik på et tag for at filtrere – klik igen for at fjerne det.",
+          "Tags ved selve genvejene kan også klikkes på.",
+          "Tag-filtre kan kombineres med en kategori i venstremenuen og med søgefeltet.",
+          "Har du mange tags, vises de 18 mest brugte; resten kommer frem med “+ flere”."
+        ]),
+        H3("Skriv tags"),
+        UL([
+          ["Tryk ", KB("Enter"), " eller komma efter hvert tag. Du kan skrive flere adskilt af komma på én gang."],
+          "Eksisterende tags foreslås, mens du skriver.",
+          "Skriver du et tag, der findes i forvejen med en anden stavemåde (fx “rapportering”), bruges den eksisterende (“Rapportering”) – så du ikke får dubletter.",
+          ["", KB("Backspace"), " i et tomt felt fjerner det sidste tag; × fjerner et bestemt."]
+        ])),
+
+      sec("tagmgr", "6. Tags og farver",
+        P("Åbn ", B("🎨 Tags og farver"), " nederst i venstremenuen (eller 🎨 i tag-rækken). Her ser du alle tags og hvor mange genveje, der har dem."),
+        shot("Tag-oversigten.",
+          el("div", { class: "fakedlg wide" },
+            el("div", { class: "fdh" }, "Tags og farver"),
+            [["Rapportering", 4, null], ["WEEE", 2, T1], ["Økonomi", 3, null]].map(([n, c, col], i) =>
+              el("div", { class: "tm-r" },
+                el("span", { class: "nm" }, demoChip(n, null, false, col)), el("span", { class: "n" }, String(c)),
+                el("span", { class: "swrow" }, el("span", { class: "sw none" + (!col ? " on" : "") }, "×"), COLORS.map(cc => el("span", { class: "sw" + (col === cc ? " on" : ""), style: { "--c": cc } }))),
+                i === 0 ? co(1) : null,
+                el("span", { class: "act show" }, "✎"), i === 0 ? co(2) : null, el("span", { class: "act show" }, "🗑"), i === 0 ? co(3) : null)))),
+        legend([
+          "Vælg en farve – den vises på tag-filtrene og ved genvejene. × fjerner farven.",
+          "Omdøb tagget på alle genveje. Giver du det samme navn som et andet tag, bliver de to slået sammen til ét.",
+          "Fjern tagget fra alle genveje. Genvejene beholdes."
+        ])),
+
+      sec("fav", "7. Favoritter",
+        UL([
+          "Hold musen over en genvej og klik ☆ – den bliver til ★.",
+          "⭐ Favoritter i venstremenuen viser alle favoritter, uanset kategori.",
+          "Du kan også sætte flueben ved Favorit, når du tilføjer eller redigerer en genvej, eller gøre mange til favoritter på én gang med ☑ Markér."
+        ])),
+
+      sec("select", "8. Markér flere og redigér samlet",
+        OL([
+          ["Klik ", B("☑ Markér"), " i værktøjslinjen."],
+          ["Klik på de genveje, du vil markere. Hold ", KB("Shift"), " nede og klik for at markere alt mellem to genveje."],
+          "Vælg en handling i bjælken nederst.",
+          ["Klik ", B("Færdig"), " eller tryk ", KB("Esc"), " for at stoppe."]
+        ]),
+        shot("Tre genveje markeret.",
+          demoCard("📁", "SharePoint", C3, [
+            demoRow("📁", "Salg", "contoso.sharepoint.com/sites/Salg", { pick: true, picked: true }),
+            demoRow("♻️", "Genbrug", "contoso.sharepoint.com/sites/Genbrug", { pick: true, picked: true }),
+            demoRow("📗", "WEEE 2026", "contoso.sharepoint.com/sites/Genbrug/…/WEEE 2026.xlsx", { pick: true, picked: true }),
+            demoRow("📄", "Procedure", "contoso.sharepoint.com/…/Procedure.docx", { pick: true })
+          ]),
+          el("div", { class: "selbar demo" },
+            el("b", {}, "3 valgt"), demoBtn("Vælg alle viste (4)"), demoBtn("Ryd valg"), el("span", { class: "sep" }), co(1),
+            demoBtn("🏷 Tilføj tag…", "btn primary"), demoBtn("Fjern tag…"), demoBtn("📁 Flyt til kategori…"), demoBtn("★ Gør til favorit"), demoBtn("🗑 Slet…", "btn danger"),
+            el("span", { class: "spacer" }), demoBtn("Færdig"))),
+        legend(["Handlingerne gælder alle markerede genveje: tilføj eller fjern tags, flyt til en anden kategori, gør til (eller fjern som) favorit, eller slet."]),
+        P("Er nogle af de markerede genveje skjult af et filter, står det i bjælken, så du ikke ændrer noget, du ikke kan se.")),
+
+      sec("search", "9. Søgning og tastatur",
+        P("Søgefeltet finder genveje ud fra navn, adresse, note, tags og kategoriens navn. Skriver du flere ord, skal alle ord passe. Søgningen kan kombineres med kategori og tag-filtre."),
+        el("table", { class: "keys" },
+          el("tr", {}, el("td", {}, KB("/")), el("td", {}, "Gå til søgefeltet")),
+          el("tr", {}, el("td", {}, KB("Enter")), el("td", {}, "I søgefeltet: åbn det første resultat (det har en blå ramme)")),
+          el("tr", {}, el("td", {}, KB("Esc")), el("td", {}, "Ryd søgningen – eller afslut ☑ Markér")),
+          el("tr", {}, el("td", {}, KB("Shift"), " + klik"), el("td", {}, "Under ☑ Markér: markér alt mellem to genveje")))),
+
+      sec("office", "10. Åbn Office-filer i skrivebordsprogrammet",
+        P("Normalt åbner SharePoint- og OneDrive-filer i browseren. Er adressen den direkte adresse til en Office-fil, kan genvejen i stedet åbne filen i Excel, Word eller PowerPoint på din pc – så du redigerer den rigtige fil."),
+        UL([
+          "Valget “Åbn i Excel i stedet for browseren” dukker op i dialogen, når adressen starter med https:// og ender på et Office-filnavn (.xlsx, .xlsm, .xlsb, .xls, .csv, .docx, .docm, .doc, .pptx, .pptm, .ppt).",
+          "Delingslinks uden filnavn i adressen (fx …/:x:/g/…) giver ikke valget. Brug den direkte adresse, der ender på filnavnet.",
+          "Genveje der åbner i et program, er mærket med fx “↗ Excel”.",
+          "Første gang spørger browseren, om den må åbne programmet. Office skal være installeret på pc'en.",
+          "Afprøv linket én gang, når du har lavet det."
+        ]),
+        shot("En genvej, der åbner i Excel.",
+          demoCard("📁", "SharePoint", C3, [demoRow("📗", "WEEE 2026", "contoso.sharepoint.com/sites/Genbrug/Shared Documents/WEEE 2026.xlsx", { badge: "↗ Excel", co: co(1) })])),
+        legend(["Mærket viser, at linket åbner filen i Excel i stedet for i browseren."])),
+
+      sec("local", "11. Lokale filer og netværksdrev",
+        P("Fordi Genveje selv er en lokal fil, må den linke til andre filer på din pc og på netværksdrev. Hvad der sker, når du klikker, afhænger af filtypen:"),
+        UL([
+          [B("PDF, billeder og tekstfiler"), " åbner i en browserfane."],
+          [B("Mapper"), " viser en simpel filoversigt i browserfanen – ikke Stifinder. Derfra kan du klikke videre."],
+          [B("Excel, Word, PowerPoint og andre filer"), " åbner browseren ikke i programmet. Edge henter typisk en kopi til mappen Overførsler, og Firefox spørger, om filen skal åbnes eller gemmes."]
+        ]),
+        warnbox(B("Pas på med kopier: "), "åbner du en Office-fil via et lokalt fillink, arbejder du typisk i en kopi i Overførsler. Det, du retter i kopien, kommer ikke med i den oprindelige fil. Til filer du redigerer, er det sikrest at have dem på SharePoint/OneDrive og bruge “Åbn i Excel” (afsnit 10)."),
+        P("Netværksdrev følger de samme regler, men firmaets netværk og browserindstillinger kan blokere dem. Afprøv ét link, før du tilføjer mange.")),
+
+      sec("save", "12. Gem, backup og nye versioner",
+        el("table", { class: "keys savetbl" },
+          el("tr", {}, el("th", {}, "Hvad"), el("th", {}, "Hvornår"), el("th", {}, "Hvad gemmes")),
+          el("tr", {}, el("td", {}, B("I browseren")), el("td", {}, "Automatisk, med det samme, ved hver ændring"),
+            el("td", {}, "Alt. Men kun i den browser – Edge og Firefox har hver deres. Det forsvinder, hvis du rydder browserdata, og måske hvis filen flyttes eller omdøbes.")),
+          el("tr", {}, el("td", {}, B("💾 Gem kopi af siden")), el("td", {}, "Når du klikker"),
+            el("td", {}, "Henter en ny Genveje.html med alle genveje, kategorier og tags bygget ind. Erstat din gamle fil med den. Kopien virker også i en anden browser og på en anden pc.")),
+          el("tr", {}, el("td", {}, B("⬇️ Eksportér genveje")), el("td", {}, "Når du klikker"),
+            el("td", {}, "Henter en backup-fil (Genveje-backup-ÅÅÅÅ-MM-DD.json) med genveje, kategorier, tagfarver og huskede mappestier – uden sidens kode. Brug den, når du skifter til en ny version af siden."))),
+        P("Den gule prik ved 💾 Gem kopi af siden betyder, at du har ændret noget siden sidste kopi eller backup. Siden henter aldrig filer af sig selv."),
+        P("Browseren kan finde på at kalde filen “Genveje (1).html”, hvis der allerede ligger en med samme navn i Overførsler. Omdøb eller erstat den, som du vil."),
+        H3("⬆️ Importér genveje"),
+        P("Læser en backup-fil (.json), en gemt Genveje.html eller en gammel links.js. Før noget ændres, viser siden hvor mange genveje filen har, og hvor mange der er nye. Du vælger:"),
+        UL([
+          [B("Erstat alle"), " – dine nuværende genveje udskiftes med dem i filen."],
+          [B("Tilføj kun nye"), " – du beholder alt og får genvejene fra filen, du ikke har i forvejen (sammenlignet på adresse). Kategorier med samme navn slås sammen."],
+          [B("Annuller"), " – intet ændres."]
+        ]),
+        H3("Når der kommer en ny version af siden"),
+        OL([
+          ["I den version du bruger nu: klik ", B("⬇️ Eksportér genveje"), "."],
+          "Åbn den nye version.",
+          ["Klik ", B("⬆️ Importér genveje…"), ", vælg backup-filen og klik ", B("Erstat alle"), "."]
+        ]),
+        tip("Lægger du den nye version med samme navn i samme mappe som den gamle, henter den normalt også selv dine genveje fra browseren. Backuppen er sikkerhedsnettet."),
+        H3("Det gule banner øverst"),
+        P("Vises, når genvejene bygget ind i filen er anderledes end dem, browseren har gemt – fx hvis du åbner en ældre kopi. Vælg ", B("Brug filens genveje"), " for at erstatte browserens med filens, eller ", B("Behold browserens version"), " for at fortsætte som før.")),
+
+      sec("faq", "13. Spørgsmål og fejlfinding",
+        el("dl", { class: "faq" },
+          el("dt", {}, "Mine genveje er væk"),
+          el("dd", {}, "Typisk er browserdata blevet ryddet, du bruger en anden browser, eller filen er flyttet. Åbn din seneste gemte Genveje.html, eller brug ⬆️ Importér genveje med din backup."),
+          el("dt", {}, "Mappedialogen åbner på Skrivebordet"),
+          el("dd", {}, "Det er normalt – en webside kan ikke vælge, hvor dialogen starter. Klik i dialogens adresselinje, indsæt stien med Ctrl+V og tryk Enter."),
+          el("dt", {}, "Browseren vil “uploade” filer"),
+          el("dd", {}, "Det er browserens standardtekst for mappevalg. Intet sendes nogen steder; siden læser kun filnavnene."),
+          el("dt", {}, "Et link til en lokal fil eller et netværksdrev åbner ikke"),
+          el("dd", {}, "Tjek at stien stadig passer (er filen flyttet eller omdøbt?), og at netværksdrevet er tilgængeligt. Firmaets browserindstillinger kan også blokere fillinks."),
+          el("dt", {}, "“Åbn i Excel” virker ikke"),
+          el("dd", {}, "Tjek at adressen er den direkte adresse til filen (ender på fx .xlsx), at Office er installeret, og at du har sagt ja, da browseren spurgte om at åbne programmet."),
+          el("dt", {}, "Siden viser en fejl om genvejslisten"),
+          el("dd", {}, "De indbyggede data i filen er beskadiget – fx efter at være redigeret i hånden. Tryk F12 → Konsol for at se hvor. Du kan stadig importere en backup."))),
+
+      sec("limits", "14. Det kan siden ikke",
+        P("Genveje kører i browseren uden installation. Det sætter nogle grænser, som ingen indstilling kan ændre:"),
+        UL([
+          "Åbne Stifinder eller starte programmer direkte (undtagen Office via “Åbn i Excel/Word/PowerPoint”).",
+          "Se den fulde sti til en fil eller mappe, du vælger eller trækker ind.",
+          "Skrive i sin egen fil – derfor “Gem kopi af siden”.",
+          "Tjekke om en fil stadig findes, eller vise et eksempel af den.",
+          "Synkronisere mellem browsere eller pc'er – det sker kun via en gemt kopi eller en backup."
+        ])),
+
+      el("p", { class: "dfoot" }, `Genveje · version ${APP_VERSION}`)
+    ];
+  }
+
+  function renderDocs() {
+    const box = $("docs");
+    if (!docsBuilt) { fill(box, buildDocs()); docsBuilt = true; }
+  }
+  $("docs").addEventListener("click", e => {
+    const a = e.target.closest("[data-doc]");
+    if (!a) return;
+    e.preventDefault();
+    const t = $("doc-" + a.dataset.doc);
+    if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
   // ---------- Søgning og tastatur ----------
   const search = $("search");
-  search.addEventListener("input", () => { UI.q = search.value.trim(); renderTagRow(); renderGrid(); });
+  search.addEventListener("input", () => { UI.q = search.value.trim(); if (UI.view === DOCS) { leaveDocs(); return; } renderTagRow(); renderGrid(); });
   search.addEventListener("keydown", e => {
     if (e.key === "Enter" && firstLink) openHref(hrefOf(firstLink));
     if (e.key === "Escape") { search.value = ""; UI.q = ""; render(); }
