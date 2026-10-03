@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genveje</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230078d4'/%3E%3Crect x='13' y='13' width='17' height='17' rx='3.5' fill='%23fff'/%3E%3Crect x='34' y='13' width='17' height='17' rx='3.5' fill='%23fff' fill-opacity='.75'/%3E%3Crect x='13' y='34' width='17' height='17' rx='3.5' fill='%23fff' fill-opacity='.75'/%3E%3Cpolygon points='42.0,32.5 44.4,38.8 51.0,39.1 45.8,43.2 47.6,49.7 42.0,46.0 36.4,49.7 38.2,43.2 33.0,39.1 39.6,38.8' fill='%23ffc83d'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg:#f4f6f8; --panel:#ffffff; --side:#1f2a37; --side-text:#cbd5e1;
+  --text:#1f2937; --muted:#6b7280; --accent:#0078d4; --hover:#eef6ff;
+  --border:#e5e7eb; --star:#f5b301; --danger:#c42b1c; --warn-bg:#fff4ce; --warn-text:#5c4400;
+}
+:root[data-theme="dark"] {
+  --bg:#111827; --panel:#1f2937; --side:#0b1220; --side-text:#9ca3af;
+  --text:#e5e7eb; --muted:#9ca3af; --accent:#4ea8ff; --hover:#273449;
+  --border:#374151; --danger:#ff6b5b; --warn-bg:#3d3420; --warn-text:#f5dfa0;
+}
+* { box-sizing:border-box; }
+html, body { margin:0; height:100%; }
+body { font-family:"Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--text); display:flex; }
+button, input { font:inherit; }
+
+/* ---- Venstremenu ---- */
+nav { width:240px; flex-shrink:0; background:var(--side); color:var(--side-text);
+      padding:18px 0; overflow-y:auto; height:100vh; display:flex; flex-direction:column; }
+nav h1 { font-size:18px; color:#fff; margin:0 20px 16px; }
+#navItems { flex:1; }
+nav button { display:flex; justify-content:space-between; align-items:center; gap:8px;
+             width:100%; background:none; border:0; border-left:3px solid transparent;
+             color:inherit; text-align:left; padding:8px 20px 8px 17px; cursor:pointer; }
+nav button:hover { background:rgba(255,255,255,.06); color:#fff; }
+nav button.active { color:#fff; border-left-color:var(--accent); background:rgba(0,120,212,.2); }
+nav .count { font-size:12px; opacity:.7; }
+nav hr { border:0; border-top:1px solid rgba(255,255,255,.12); margin:8px 20px; }
+.tools { padding-top:8px; }
+.tools button { font-size:13px; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--star); display:none; }
+.dot.on { display:inline-block; }
+
+/* ---- Hovedområde ---- */
+main { flex:1; padding:20px 28px; overflow-y:auto; height:100vh; }
+.top { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+#search { flex:1; padding:10px 14px; font-size:16px; border:1px solid var(--border);
+          border-radius:8px; background:var(--panel); color:var(--text); }
+#search:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+.btn { padding:10px 14px; border:1px solid var(--border); border-radius:8px;
+       background:var(--panel); color:var(--text); cursor:pointer; white-space:nowrap; }
+.btn:hover { border-color:var(--accent); }
+.btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn.danger { color:var(--danger); }
+#status { color:var(--muted); font-size:13px; margin:0 0 16px; }
+#banner { display:none; background:var(--warn-bg); color:var(--warn-text); border-radius:8px;
+          padding:10px 14px; margin-bottom:12px; font-size:14px; align-items:center; gap:10px; flex-wrap:wrap; }
+#banner.on { display:flex; }
+#banner span { flex:1; min-width:200px; }
+#banner .btn { padding:6px 10px; font-size:13px; }
+
+#grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:18px; align-items:start; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.card h2 { font-size:15px; margin:0 0 8px; color:var(--accent); }
+
+.row { display:flex; align-items:center; border-radius:6px; }
+.row:hover { background:var(--hover); }
+.row.first { outline:2px solid var(--accent); outline-offset:-2px; }
+.row a { flex:1; display:flex; gap:10px; align-items:center; padding:7px 8px;
+         color:var(--text); text-decoration:none; min-width:0; }
+.icon { width:22px; text-align:center; flex-shrink:0; }
+.txt { min-width:0; }
+.name { display:block; }
+.sub { display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.act { background:none; border:0; cursor:pointer; font-size:17px; line-height:1;
+       color:var(--muted); padding:4px 6px; opacity:0; }
+.row:hover .act, .act:focus { opacity:1; }
+.star { opacity:.3; padding-right:10px; }
+.star.on { color:var(--star); opacity:1; }
+.act:hover { color:var(--accent); }
+.empty { color:var(--muted); padding:40px 0; text-align:center; grid-column:1 / -1; }
+.hint { color:var(--muted); font-size:12px; margin-top:24px; }
+kbd { border:1px solid var(--border); border-radius:4px; padding:0 5px; font-size:11px; }
+
+/* ---- Dialog ---- */
+dialog { border:1px solid var(--border); border-radius:12px; padding:0; width:min(520px, 94vw);
+         background:var(--panel); color:var(--text); box-shadow:0 10px 40px rgba(0,0,0,.3); }
+dialog::backdrop { background:rgba(0,0,0,.4); }
+dialog form { padding:20px 22px; display:flex; flex-direction:column; gap:12px; }
+dialog h2 { margin:0 0 4px; font-size:18px; }
+dialog label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); }
+dialog input:not([type=checkbox]) { padding:8px 10px; border:1px solid var(--border); border-radius:6px;
+         background:var(--bg); color:var(--text); font-size:15px; }
+dialog input:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+dialog small { color:var(--muted); font-size:12px; margin-top:-6px; }
+.two { display:grid; grid-template-columns:1fr 110px; gap:10px; }
+.emojis { display:flex; flex-wrap:wrap; gap:2px; margin-top:-4px; }
+.emojis button { background:none; border:1px solid transparent; border-radius:6px; cursor:pointer;
+                 font-size:18px; padding:2px 5px; }
+.emojis button:hover { border-color:var(--border); background:var(--hover); }
+label.check { flex-direction:row; align-items:center; gap:8px; color:var(--text); font-size:14px; }
+.btns { display:flex; gap:8px; margin-top:6px; }
+.spacer { flex:1; }
+
+#toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1f2937; color:#fff;
+         padding:10px 16px; border-radius:8px; font-size:14px; opacity:0; transition:opacity .2s;
+         pointer-events:none; max-width:90vw; z-index:10; }
+#toast.on { opacity:1; }
+
+/* ---- Tilføj filer fra mappe ---- */
+.pick { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+#fdInfo { font-size:13px; color:var(--muted); }
+.warn { background:var(--warn-bg); color:var(--warn-text); border-radius:6px; padding:8px 10px; font-size:13px; }
+.flist { border:1px solid var(--border); border-radius:6px; max-height:320px; overflow-y:auto; background:var(--bg); }
+.frow { display:flex !important; flex-direction:row !important; align-items:center; gap:8px; padding:5px 10px;
+        color:var(--text) !important; font-size:14px !important; cursor:pointer; border-bottom:1px solid var(--border); }
+.frow:last-child { border-bottom:0; }
+.frow:hover { background:var(--hover); }
+.frow .txt { flex:1; }
+.frow.exists { opacity:.5; cursor:default; }
+.frow em { font-size:12px; color:var(--muted); white-space:nowrap; }
+.fmore { padding:8px 10px; font-size:12px; color:var(--muted); }
+#fdFilter { padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:15px; }
+.frow.dir .name { font-weight:600; }
+#fdlg { width:min(640px, 94vw); }
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>🏠 Genveje</h1>
+  <div id="navItems"></div>
+  <div class="tools">
+    <hr>
+    <button id="exportBtn" title="Hent en kopi af siden med alle dine genveje indbygget"><span>💾 Gem kopi af siden</span><span id="dirty" class="dot" title="Der er ændringer der ikke er gemt i en kopi endnu"></span></button>
+    <button id="backupBtn" title="Hent en backup-fil med kun dine genveje – kan importeres i en ny version af siden"><span>⬇️ Eksportér genveje</span></button>
+    <button id="importBtn" title="Indlæs genveje fra en backup-fil eller en gemt Genveje.html"><span>⬆️ Importér genveje…</span></button>
+    <input type="file" id="importFile" accept=".html,.htm,.js,.json" hidden>
+  </div>
+</nav>
+
+<main>
+  <div id="banner"></div>
+  <div class="top">
+    <input id="search" type="search" placeholder="Søg efter genvej… (tryk / for at søge)" autocomplete="off">
+    <button id="addBtn" class="btn primary">+ Tilføj genvej</button>
+    <button id="addFilesBtn" class="btn" title="Vælg flere filer fra en mappe på én gang">📂 Tilføj fra mappe</button>
+    <button id="theme" class="btn" title="Skift lyst/mørkt tema">🌓</button>
+  </div>
+  <div id="status"></div>
+  <div id="grid"></div>
+  <div class="hint">
+    <kbd>/</kbd> søg &nbsp; <kbd>Enter</kbd> åbn første resultat &nbsp; <kbd>Esc</kbd> ryd søgning &nbsp;
+    ★ favorit &nbsp; ✎ redigér &nbsp; Træk et link fra adresselinjen ind på siden for at tilføje det
+  </div>
+</main>
+
+<dialog id="dlg">
+  <form id="form">
+    <h2 id="dlgTitle">Tilføj genvej</h2>
+
+    <label>Adresse eller filsti *
+      <input id="fUrl" required autocomplete="off" placeholder="https://…  eller  C:\Mappe\fil.xlsx">
+    </label>
+    <small>Webadresse, SharePoint-link (⋯ → Kopiér link) eller sti fra Stifinder (højreklik → Kopiér som sti).</small>
+
+    <label>Navn *
+      <input id="fName" required autocomplete="off">
+    </label>
+
+    <div class="two">
+      <label>Kategori *
+        <input id="fCat" list="catList" required autocomplete="off" placeholder="Vælg eller skriv ny">
+      </label>
+      <label>Ikon
+        <input id="fIcon" maxlength="8" autocomplete="off">
+      </label>
+    </div>
+    <datalist id="catList"></datalist>
+    <div class="emojis" id="emojis"></div>
+
+    <label>Søgeord
+      <input id="fTags" autocomplete="off" placeholder="adskil med komma, fx fragt, rapport">
+    </label>
+
+    <label>Note
+      <input id="fNote" autocomplete="off" placeholder="Vises under navnet i stedet for adressen">
+    </label>
+
+    <label class="check"><input type="checkbox" id="fFav"> Favorit</label>
+
+    <div class="btns">
+      <button type="button" id="fDel" class="btn danger">Slet</button>
+      <span class="spacer"></span>
+      <button type="button" id="fCancel" class="btn">Annuller</button>
+      <button type="submit" class="btn primary">Gem</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast"></div>
+
+<dialog id="idlg">
+  <form method="dialog" onsubmit="return false">
+    <h2>Importér genveje</h2>
+    <p id="iText" style="margin:0;line-height:1.5"></p>
+    <small style="margin:0">“Tilføj kun nye” beholder dine nuværende genveje og tilføjer dem fra filen, du ikke har i forvejen (sammenlignet på adresse).</small>
+    <div class="btns">
+      <button type="button" id="iCancel" class="btn">Annuller</button>
+      <span class="spacer"></span>
+      <button type="button" id="iMerge" class="btn">Tilføj kun nye</button>
+      <button type="button" id="iReplace" class="btn primary">Erstat alle</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="fdlg">
+  <form id="fform">
+    <h2>Tilføj filer og mapper</h2>
+
+    <label>1. Mappens sti *
+      <input id="fdPath" list="fdPaths" required autocomplete="off" placeholder="C:\Users\…\Rapporter   eller   \\server\share\mappe">
+    </label>
+    <datalist id="fdPaths"></datalist>
+    <small>Markér mappen i Stifinder → Ctrl+Shift+C (eller Shift+højreklik → Kopiér som sti) og indsæt her. Stier du har brugt før, kan vælges i listen.</small>
+
+    <div class="pick">
+      <button type="button" id="fdPick" class="btn">2. Vælg samme mappe…</button>
+      <span id="fdInfo">Browseren spørger måske om du vil “uploade” filerne – intet sendes nogen steder, siden læser kun filnavnene.</span>
+    </div>
+    <input type="file" id="fdInput" webkitdirectory multiple hidden>
+
+    <div id="fdWarn" class="warn" hidden></div>
+
+    <div class="pick" id="fdTools" hidden>
+      <input id="fdFilter" type="search" placeholder="Filtrér, fx xlsx eller budget" autocomplete="off" style="flex:1">
+      <select id="fdType" class="btn" style="padding:8px 10px">
+        <option value="all">Filer og mapper</option>
+        <option value="files">Kun filer</option>
+        <option value="dirs">Kun mapper</option>
+      </select>
+    </div>
+    <div id="fdList" class="flist" hidden></div>
+
+    <label>3. Kategori *
+      <input id="fdCat" list="catList" required autocomplete="off" placeholder="Vælg eller skriv ny">
+    </label>
+
+    <div class="btns">
+      <button type="button" id="fdAll" class="btn" hidden>Vælg alle viste</button>
+      <span class="spacer"></span>
+      <button type="button" id="fdCancel" class="btn">Annuller</button>
+      <button type="submit" id="fdAdd" class="btn primary" disabled>Tilføj valgte</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Startgenveje. Opdateres automatisk når du bruger "Gem kopi af siden". -->
+<script id="linksData">
+window.LINKS = [
+  {"category":"Power Platform","name":"Power BI","url":"https://app.powerbi.com","icon":"📊","favorite":true},
+  {"category":"Power Platform","name":"Power Automate","url":"https://make.powerautomate.com","icon":"⚙️","favorite":true},
+  {"category":"Microsoft 365","name":"Outlook","url":"https://outlook.cloud.microsoft/mail/","icon":"📧"},
+  {"category":"Microsoft 365","name":"Excel Online","url":"https://excel.cloud.microsoft/","icon":"📗"},
+  {"category":"Microsoft 365","name":"To Do","url":"https://to-do.office.com/","icon":"📋"},
+  {"category":"SharePoint","name":"United DK","url":"https://ragnsells1.sharepoint.com/sites/UnitedDK","icon":"📁","favorite":true},
+  {"category":"SharePoint","name":"WEEE DK","url":"https://ragnsells1.sharepoint.com/sites/WEEE_DK","icon":"♻️","favorite":true,"tags":["weee","rapportering"]}
+];
+</script>
+<script>
+(function () {
+  "use strict";
+
+  // Kopi af siden som den ser ud før noget er tegnet – bruges af "Gem kopi af siden"
+  const PAGE_TEMPLATE = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+  const LINKS_KEY = "genveje.links";
+  const BASE_KEY  = "genveje.base";
+  const FAV_KEY   = "genveje.favorites";
+  const THEME_KEY = "genveje.theme";
+  const DIRTY_KEY = "genveje.dirty";
+  const ALL = "__all", FAV = "__fav";
+  const EMOJIS = ["📊","📁","📂","📗","📘","📙","📕","📄","⚙️","📧","📋","♻️","🔗","⭐","🛠️","💰","🚚","👥"];
+
+  const $ = id => document.getElementById(id);
+
+  // ---------- Hjælpefunktioner ----------
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g,
+    c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+  let toastTimer;
+  function toast(msg, ms = 3500) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("on"), ms);
+  }
+
+  function shortUrl(url) {
+    try {
+      const u = new URL(url);
+      if (u.protocol === "file:") {
+        return decodeURIComponent(u.host
+          ? "\\\\" + u.host + u.pathname.replace(/\//g, "\\")
+          : u.pathname.replace(/^\//, "").replace(/\//g, "\\"));
+      }
+      return u.host + (u.pathname !== "/" ? u.pathname : "");
+    } catch (e) { return url; }
+  }
+
+  // Gør Windows-stier og "www."-adresser til rigtige links
+  function normalizeUrl(s) {
+    s = String(s || "").trim().replace(/^"(.*)"$/, "$1").trim();   // "Kopiér som sti" tilføjer anførselstegn
+    if (/^[a-zA-Z]:[\\/]/.test(s) || /^\\\\/.test(s)) {
+      // C:\a b\x#1.xlsx → file:///C:/a%20b/x%231.xlsx,   \\srv\x → file://///srv/x
+      return "file:///" + s.replace(/\\/g, "/").split("/")
+        .map((seg, i) => (i === 0 && /^[a-zA-Z]:$/.test(seg)) ? seg : encodeURIComponent(seg))
+        .join("/");
+    }
+    if (/^www\./i.test(s)) return "https://" + s;
+    return s;
+  }
+
+  function guessName(url) {
+    try {
+      const u = new URL(url);
+      const fileParam = u.searchParams.get("file");
+      if (fileParam) return fileParam.replace(/\.[^.]+$/, "");
+      const seg = decodeURIComponent(u.pathname.split("/").filter(Boolean).pop() || "");
+      if (u.protocol === "file:") return seg.replace(/\.[^.]+$/, "") || url;
+      if (/\.(xlsx?|xlsm|docx?|pptx?|pdf|csv|pbix|txt)$/i.test(seg)) return seg.replace(/\.[^.]+$/, "");
+      return u.hostname.replace(/^www\./, "");
+    } catch (e) { return ""; }
+  }
+
+  function guessIcon(url) {
+    const s = url.toLowerCase();
+    const sp = s.match(/sharepoint\.com\/:([xwpb]):\//);
+    if (sp) return { x:"📗", w:"📘", p:"📙", b:"📕" }[sp[1]];
+    const path = s.split(/[?#]/)[0];
+    let ext = (path.match(/\.([a-z0-9]+)$/) || [])[1];
+    try { const f = new URL(url).searchParams.get("file"); if (f) ext = (f.toLowerCase().match(/\.([a-z0-9]+)$/) || [])[1]; } catch (e) {}
+    const byExt = { xlsx:"📗", xlsm:"📗", xls:"📗", csv:"📗", docx:"📘", doc:"📘", pptx:"📙", ppt:"📙", pdf:"📕", pbix:"📊", txt:"📄" };
+    if (byExt[ext]) return byExt[ext];
+    if (s.includes("powerbi")) return "📊";
+    if (s.includes("powerautomate")) return "⚙️";
+    if (s.includes("outlook")) return "📧";
+    if (s.includes("sharepoint")) return "📁";
+    if (s.startsWith("file:")) return path.endsWith("/") ? "📂" : "📄";
+    return "🔗";
+  }
+
+  function clean(arr) {
+    return (Array.isArray(arr) ? arr : [])
+      .filter(l => l && l.name && l.url)
+      .map(l => {
+        const o = { category: String(l.category || "Andet"), name: String(l.name), url: String(l.url) };
+        if (l.icon) o.icon = String(l.icon);
+        if (l.favorite) o.favorite = true;
+        if (Array.isArray(l.tags) && l.tags.length) o.tags = l.tags.map(String);
+        if (l.note) o.note = String(l.note);
+        return o;
+      });
+  }
+
+  // ---------- Data ----------
+  const fileOk = Array.isArray(window.LINKS);
+  const baseSig = fileOk ? JSON.stringify(window.LINKS) : null;
+
+  let links = null;
+  const savedLinks = store.get(LINKS_KEY);
+  if (savedLinks) { try { links = clean(JSON.parse(savedLinks)); } catch (e) { links = null; } }
+  const usingSaved = links !== null;
+  if (!usingSaved) links = clean(window.LINKS);
+
+  let favs = null;
+  const savedFavs = store.get(FAV_KEY);
+  if (savedFavs) { try { favs = new Set(JSON.parse(savedFavs)); } catch (e) {} }
+  if (!favs) favs = new Set(links.filter(l => l.favorite).map(l => l.url));
+
+  let active = ALL;
+  let query = "";
+  let firstUrl = null;
+
+  const categories = () => {
+    const c = [];
+    links.forEach(l => { if (!c.includes(l.category)) c.push(l.category); });
+    return c;
+  };
+
+  function persist() {
+    const ok = store.set(LINKS_KEY, JSON.stringify(links));
+    if (baseSig !== null) store.set(BASE_KEY, baseSig);
+    store.set(FAV_KEY, JSON.stringify([...favs]));
+    store.set(DIRTY_KEY, "1");
+    $("dirty").classList.add("on");
+    if (!ok) toast("⚠️ Browseren tillader ikke at gemme her – brug “Gem kopi af siden” for ikke at miste ændringerne.", 6000);
+  }
+
+  function saveFavs() { store.set(FAV_KEY, JSON.stringify([...favs])); }
+
+  // ---------- Banner ----------
+  function showBanner(html) {
+    const b = $("banner");
+    b.innerHTML = html;
+    b.classList.toggle("on", !!html);
+  }
+
+  if (!fileOk && !usingSaved) {
+    showBanner("<span>Genvejslisten i filen indeholder en fejl (F12 → Konsol viser hvor). Du kan stadig tilføje genveje her.</span>");
+  } else if (usingSaved && fileOk && store.get(BASE_KEY) !== baseSig) {
+    showBanner(`<span><b>Genvejene i denne fil er anderledes</b> end dem browseren har gemt. Hvilke vil du bruge?</span>
+      <button class="btn" id="useFile">Brug filens genveje</button>
+      <button class="btn" id="keepMine">Behold browserens version</button>`);
+    $("useFile").onclick = () => {
+      links = clean(window.LINKS);
+      favs = new Set(links.filter(l => l.favorite).map(l => l.url));
+      persist();
+      store.del(DIRTY_KEY); $("dirty").classList.remove("on");
+      showBanner(""); render();
+      toast("Genveje indlæst fra filen");
+    };
+    $("keepMine").onclick = () => { store.set(BASE_KEY, baseSig); showBanner(""); };
+  }
+  if (store.get(DIRTY_KEY)) $("dirty").classList.add("on");
+
+  // ---------- Tema ----------
+  const root = document.documentElement;
+  const savedTheme = store.get(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = savedTheme || (prefersDark ? "dark" : "light");
+  $("theme").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+    store.set(THEME_KEY, root.dataset.theme);
+  });
+
+  // ---------- Filtrering ----------
+  function visible() {
+    let list = links;
+    if (active === FAV) list = list.filter(l => favs.has(l.url));
+    else if (active !== ALL) list = list.filter(l => l.category === active);
+
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length) {
+      list = list.filter(l => {
+        const hay = [l.name, l.category, l.url, l.note, ...(l.tags || [])].join(" ").toLowerCase();
+        return terms.every(t => hay.includes(t));
+      });
+    }
+    return list;
+  }
+
+  // ---------- Venstremenu ----------
+  function renderNav() {
+    const cats = categories();
+    if (active !== ALL && active !== FAV && !cats.includes(active)) active = ALL;
+
+    const btn = (key, label, count) =>
+      `<button data-cat="${esc(key)}" class="${key === active ? "active" : ""}">
+         <span>${label}</span><span class="count">${count}</span></button>`;
+
+    let html = btn(ALL, "📚 Alle", links.length)
+             + btn(FAV, "⭐ Favoritter", links.filter(l => favs.has(l.url)).length)
+             + "<hr>";
+    cats.forEach(c => { html += btn(c, esc(c), links.filter(l => l.category === c).length); });
+    $("navItems").innerHTML = html;
+  }
+
+  // ---------- Hovedvisning ----------
+  const grid = $("grid");
+
+  function renderGrid() {
+    const list = visible();
+    firstUrl = list.length ? list[0].url : null;
+
+    $("status").textContent = list.length === links.length
+      ? `${links.length} genveje`
+      : `Viser ${list.length} af ${links.length} genveje`;
+
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty">${
+        !links.length ? "Ingen genveje endnu – klik på <b>+ Tilføj genvej</b>."
+        : active === FAV && !query ? "Ingen favoritter endnu – klik på ★ ud for et link."
+        : "Ingen genveje matcher."}</div>`;
+      return;
+    }
+
+    let html = "";
+    let isFirst = true;
+    categories().forEach(c => {
+      const items = list.filter(l => l.category === c);
+      if (!items.length) return;
+      html += `<div class="card"><h2>${esc(c)}</h2>`;
+      items.forEach(l => {
+        const i = links.indexOf(l);
+        const on = favs.has(l.url);
+        html += `<div class="row${isFirst && query ? " first" : ""}">
+          <a href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.url)}">
+            <span class="icon">${esc(l.icon || "🔗")}</span>
+            <span class="txt"><span class="name">${esc(l.name)}</span>
+              <span class="sub">${esc(l.note || shortUrl(l.url))}</span></span>
+          </a>
+          <button class="act edit" data-i="${i}" title="Redigér">✎</button>
+          <button class="act star${on ? " on" : ""}" data-i="${i}"
+            title="${on ? "Fjern fra favoritter" : "Tilføj til favoritter"}">${on ? "★" : "☆"}</button>
+        </div>`;
+        isFirst = false;
+      });
+      html += "</div>";
+    });
+    grid.innerHTML = html;
+  }
+
+  function render() { renderNav(); renderGrid(); }
+
+  // ---------- Dialog: tilføj / redigér ----------
+  const dlg = $("dlg");
+  let editIndex = -1;
+
+  $("emojis").innerHTML = EMOJIS.map(e => `<button type="button" title="Brug ${e}">${e}</button>`).join("");
+  $("emojis").addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (b) $("fIcon").value = b.textContent;
+  });
+
+  function openDialog(i, preset = {}) {
+    editIndex = i;
+    const cur = i >= 0 ? links[i]
+      : { category: (active !== ALL && active !== FAV) ? active : "", ...preset };
+    $("dlgTitle").textContent = i >= 0 ? "Redigér genvej" : "Tilføj genvej";
+    $("fUrl").value  = cur.url || "";
+    $("fName").value = cur.name || "";
+    $("fCat").value  = cur.category || "";
+    $("fIcon").value = cur.icon || "";
+    $("fTags").value = (cur.tags || []).join(", ");
+    $("fNote").value = cur.note || "";
+    $("fFav").checked = i >= 0 ? favs.has(cur.url) : active === FAV;
+    $("fDel").hidden = i < 0;
+    $("catList").innerHTML = categories().map(c => `<option value="${esc(c)}">`).join("");
+    dlg.showModal();
+    (cur.url ? $("fName") : $("fUrl")).focus();
+  }
+
+  function fillFromUrl() {
+    const u = normalizeUrl($("fUrl").value);
+    $("fUrl").value = u;
+    if (!u) return;
+    if (!$("fName").value.trim()) $("fName").value = guessName(u);
+    if (!$("fIcon").value.trim()) $("fIcon").value = guessIcon(u);
+  }
+  $("fUrl").addEventListener("change", fillFromUrl);
+  $("fUrl").addEventListener("paste", () => setTimeout(fillFromUrl, 0));
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const url = normalizeUrl($("fUrl").value);
+    const name = $("fName").value.trim();
+    if (!url || !name) return;
+
+    const item = { category: $("fCat").value.trim() || "Andet", name, url };
+    const icon = $("fIcon").value.trim();
+    const tags = $("fTags").value.split(",").map(t => t.trim()).filter(Boolean);
+    const note = $("fNote").value.trim();
+    if (icon) item.icon = icon;
+    if (tags.length) item.tags = tags;
+    if (note) item.note = note;
+
+    if (editIndex >= 0) {
+      const oldUrl = links[editIndex].url;
+      if (oldUrl !== url) favs.delete(oldUrl);
+      links[editIndex] = item;
+    } else {
+      // Indsæt efter sidste link i samme kategori, så den eksporterede fil forbliver ordnet
+      const last = links.map(l => l.category).lastIndexOf(item.category);
+      links.splice(last >= 0 ? last + 1 : links.length, 0, item);
+    }
+    $("fFav").checked ? favs.add(url) : favs.delete(url);
+
+    persist();
+    dlg.close();
+    render();
+    toast(editIndex >= 0 ? `“${name}” opdateret` : `“${name}” tilføjet`);
+  });
+
+  $("fCancel").addEventListener("click", () => dlg.close());
+
+  $("fDel").addEventListener("click", () => {
+    if (editIndex < 0) return;
+    const l = links[editIndex];
+    if (!confirm(`Slet “${l.name}”?`)) return;
+    links.splice(editIndex, 1);
+    if (!links.some(x => x.url === l.url)) favs.delete(l.url);
+    persist();
+    dlg.close();
+    render();
+    toast(`“${l.name}” slettet`);
+  });
+
+  $("addBtn").addEventListener("click", () => openDialog(-1));
+
+  // ---------- Dialog: tilføj filer fra mappe ----------
+  const FOLDERS_KEY = "genveje.folders";
+  const fdlg = $("fdlg");
+  const SHOW_MAX = 500;
+  let picked = [];          // [{ key, rel, name, dir }] – dir=true for mapper, key unik pr. post
+  let rootName = "";
+  let shown = [];
+  const selected = new Set();
+
+  const folderMap = () => { try { return JSON.parse(store.get(FOLDERS_KEY) || "{}"); } catch (e) { return {}; } };
+  const baseOf = () => $("fdPath").value.trim().replace(/^"(.*)"$/, "$1").trim().replace(/[\\/]+$/, "");
+  const buildUrl = rel => normalizeUrl(baseOf() + (rel ? "\\" + rel.replace(/\//g, "\\") : ""));
+  const entryUrl = f => buildUrl(f.rel) + (f.dir ? "/" : "");
+  const byKey = key => picked.find(f => f.key === key);
+
+  function openFolderDialog() {
+    picked = []; rootName = ""; shown = []; selected.clear();
+    $("fdPath").value = "";
+    $("fdCat").value = (active !== ALL && active !== FAV) ? active : "";
+    $("fdPaths").innerHTML = Object.values(folderMap()).map(p => `<option value="${esc(p)}">`).join("");
+    $("catList").innerHTML = categories().map(c => `<option value="${esc(c)}">`).join("");
+    $("fdInfo").textContent = "Browseren spørger måske om du vil “uploade” filerne – intet sendes nogen steder, siden læser kun filnavnene.";
+    $("fdFilter").value = "";
+    $("fdType").value = "all";
+    ["fdTools", "fdList", "fdAll", "fdWarn"].forEach(id => $(id).hidden = true);
+    updateAddBtn();
+    fdlg.showModal();
+    $("fdPath").focus();
+  }
+
+  function checkPath() {
+    const last = baseOf().split(/[\\/]/).filter(Boolean).pop() || "";
+    const w = $("fdWarn");
+    if (rootName && last && last.toLowerCase() !== rootName.toLowerCase()) {
+      w.textContent = `⚠️ Du har valgt mappen “${rootName}”, men stien slutter med “${last}”. Tjek at stien peger på den samme mappe – ellers virker linkene ikke.`;
+      w.hidden = false;
+    } else {
+      w.hidden = true;
+    }
+  }
+
+  function updateAddBtn() {
+    $("fdAdd").disabled = selected.size === 0;
+    $("fdAdd").textContent = selected.size ? `Tilføj valgte (${selected.size})` : "Tilføj valgte";
+  }
+
+  function renderFileList() {
+    const terms = $("fdFilter").value.toLowerCase().split(/\s+/).filter(Boolean);
+    const type = $("fdType").value;
+    shown = picked.filter(f =>
+      (type === "all" || (type === "dirs") === f.dir) &&
+      terms.every(t => (f.rel || f.name).toLowerCase().includes(t)));
+    const existing = baseOf() ? new Set(links.map(l => l.url)) : new Set();
+
+    let html = "";
+    shown.slice(0, SHOW_MAX).forEach(f => {
+      const exists = existing.has(entryUrl(f));
+      const parent = f.rel.includes("/") ? f.rel.slice(0, f.rel.lastIndexOf("/")) : "";
+      const sub = f.root ? "den valgte mappe" : parent;
+      html += `<label class="frow${f.dir ? " dir" : ""}${exists ? " exists" : ""}">
+        <input type="checkbox" data-key="${esc(f.key)}"${selected.has(f.key) ? " checked" : ""}${exists ? " disabled" : ""}>
+        <span class="icon">${f.dir ? "📂" : guessIcon(f.name)}</span>
+        <span class="txt"><span class="name">${esc(f.name)}</span>${sub ? `<span class="sub">${esc(sub)}</span>` : ""}</span>
+        ${exists ? "<em>findes allerede</em>" : ""}
+      </label>`;
+    });
+    if (!shown.length) html = `<div class="fmore">Intet matcher.</div>`;
+    else if (shown.length > SHOW_MAX) html += `<div class="fmore">Viser ${SHOW_MAX} af ${shown.length} – filtrér for at se resten.</div>`;
+    $("fdList").innerHTML = html;
+    $("fdAll").textContent = `Vælg alle viste (${shown.length})`;
+  }
+
+  $("addFilesBtn").addEventListener("click", openFolderDialog);
+  $("fdCancel").addEventListener("click", () => fdlg.close());
+  $("fdPick").addEventListener("click", () => $("fdInput").click());
+  $("fdPath").addEventListener("input", () => { checkPath(); if (picked.length) renderFileList(); });
+
+  $("fdInput").addEventListener("change", e => {
+    const files = [...e.target.files];
+    e.target.value = "";
+    if (!files.length) return;
+    rootName = files[0].webkitRelativePath.split("/")[0];
+
+    const fileEntries = files
+      .map(f => ({ rel: f.webkitRelativePath.split("/").slice(1).join("/"), name: f.name, dir: false }))
+      .filter(f => !/^(~\$|\.)/.test(f.name) && !/^(desktop\.ini|thumbs\.db)$/i.test(f.name));   // spring lås-/systemfiler over
+
+    // Mapper kendes kun via filerne i dem – find alle mapper der indeholder mindst én fil
+    const dirs = new Set();
+    files.forEach(f => {
+      const parts = f.webkitRelativePath.split("/").slice(1, -1);
+      for (let i = 1; i <= parts.length; i++) {
+        if (!parts[i - 1].startsWith(".")) dirs.add(parts.slice(0, i).join("/"));
+      }
+    });
+    const dirEntries = [...dirs].map(rel => ({ rel, name: rel.split("/").pop(), dir: true }));
+
+    const sortRel = (a, b) => a.rel.localeCompare(b.rel, "da");
+    picked = [
+      { rel: "", name: rootName, dir: true, root: true },
+      ...dirEntries.sort(sortRel),
+      ...fileEntries.sort(sortRel)
+    ].map(f => ({ ...f, key: (f.dir ? "d:" : "f:") + f.rel }));
+    selected.clear();
+
+    const remembered = folderMap()[rootName.toLowerCase()];
+    if (!baseOf() && remembered) $("fdPath").value = remembered;
+
+    $("fdInfo").textContent = `📁 ${rootName} – ${fileEntries.length} filer, ${dirEntries.length} undermapper`;
+    ["fdTools", "fdList", "fdAll"].forEach(id => $(id).hidden = false);
+    checkPath();
+    renderFileList();
+    updateAddBtn();
+    $("fdFilter").focus();
+  });
+
+  $("fdFilter").addEventListener("input", renderFileList);
+  $("fdFilter").addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+  $("fdType").addEventListener("change", renderFileList);
+
+  $("fdList").addEventListener("change", e => {
+    const cb = e.target.closest("input[type=checkbox]");
+    if (!cb) return;
+    cb.checked ? selected.add(cb.dataset.key) : selected.delete(cb.dataset.key);
+    updateAddBtn();
+  });
+
+  $("fdAll").addEventListener("click", () => {
+    const existing = new Set(links.map(l => l.url));
+    const candidates = shown.filter(f => !existing.has(entryUrl(f)));
+    const allOn = candidates.length && candidates.every(f => selected.has(f.key));
+    candidates.forEach(f => allOn ? selected.delete(f.key) : selected.add(f.key));
+    renderFileList();
+    updateAddBtn();
+  });
+
+  $("fform").addEventListener("submit", e => {
+    e.preventDefault();
+    const base = baseOf();
+    if (!base || !selected.size) return;
+    if (!/^([a-zA-Z]:|\\\\)/.test(base)) {
+      $("fdWarn").textContent = "⚠️ Stien skal starte med et drevbogstav (C:\\…) eller \\\\server\\…";
+      $("fdWarn").hidden = false;
+      return;
+    }
+    const cat = $("fdCat").value.trim() || "Andet";
+    const existing = new Set(links.map(l => l.url));
+    let pos = links.map(l => l.category).lastIndexOf(cat);
+    pos = pos >= 0 ? pos + 1 : links.length;
+
+    let nFiles = 0, nDirs = 0;
+    picked.filter(f => selected.has(f.key)).forEach(f => {
+      const url = entryUrl(f);
+      if (existing.has(url)) return;
+      const name = f.dir ? f.name : (f.name.replace(/\.[^.]+$/, "") || f.name);
+      links.splice(pos++, 0, { category: cat, name, url, icon: f.dir ? "📂" : guessIcon(url) });
+      existing.add(url);
+      f.dir ? nDirs++ : nFiles++;
+    });
+
+    const map = folderMap();
+    map[rootName.toLowerCase()] = base;
+    store.set(FOLDERS_KEY, JSON.stringify(map));
+
+    persist();
+    fdlg.close();
+    render();
+    const parts = [];
+    if (nFiles) parts.push(`${nFiles} ${nFiles === 1 ? "fil" : "filer"}`);
+    if (nDirs) parts.push(`${nDirs} ${nDirs === 1 ? "mappe" : "mapper"}`);
+    toast(`${parts.join(" og ") || "Intet nyt"} tilføjet til “${cat}”`);
+  });
+
+  // ---------- Eksport / import ----------
+  function download(content, filename, type) {
+    const blob = new Blob([content], { type: type + ";charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // Genvejene med den aktuelle favoritstatus skrevet ind i hvert link
+  function linksWithFavs() {
+    return links.map(l => {
+      const o = { ...l };
+      if (favs.has(l.url)) o.favorite = true; else delete o.favorite;
+      return o;
+    });
+  }
+
+  function markSaved() {
+    store.del(DIRTY_KEY);
+    $("dirty").classList.remove("on");
+  }
+
+  $("exportBtn").addEventListener("click", () => {
+    const data = linksWithFavs();
+    const rows = data.map(o => "  " + JSON.stringify(o).replace(/<\//g, "<\\/"));
+    const script = '<script id="linksData">\nwindow.LINKS = [\n' + rows.join(",\n") + "\n];\n<\/script>";
+    const html = PAGE_TEMPLATE.replace(/<script id="linksData">[\s\S]*?<\/script>/, () => script);
+    download(html, "Genveje.html", "text/html");
+
+    // Den gemte kopi indeholder nu præcis disse genveje – undgå at den spørger når den åbnes
+    store.set(BASE_KEY, JSON.stringify(data));
+    markSaved();
+    toast("Genveje.html hentet – den indeholder alle dine genveje og kan bruges som backup eller på en anden pc.", 6000);
+  });
+
+  // Backup af kun genvejene (+ huskede mappestier) – kan importeres i nye versioner af siden
+  $("backupBtn").addEventListener("click", () => {
+    const now = new Date();
+    const stamp = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+    const backup = {
+      format: "genveje-backup",
+      version: 1,
+      exported: now.toISOString(),
+      links: linksWithFavs(),
+      folders: folderMap()
+    };
+    download(JSON.stringify(backup, null, 2), `Genveje-backup-${stamp}.json`, "application/json");
+    markSaved();
+    toast(`Backup hentet: Genveje-backup-${stamp}.json (${links.length} genveje)`, 5000);
+  });
+
+  // ----- Import -----
+  const idlg = $("idlg");
+  let pending = null;   // { links, folders, fileName }
+
+  function readImport(text) {
+    const m = text.match(/<script id="linksData">([\s\S]*?)<\/script>/);   // en gemt Genveje.html
+    if (m) text = m[1];
+    let parsed = null;
+    try { parsed = JSON.parse(text); } catch (err) {
+      try { const w = {}; new Function("window", text)(w); parsed = w.LINKS; } catch (err2) { parsed = null; }
+    }
+    if (Array.isArray(parsed)) return { links: clean(parsed), folders: null };
+    if (parsed && Array.isArray(parsed.links)) {
+      return { links: clean(parsed.links), folders: (parsed.folders && typeof parsed.folders === "object") ? parsed.folders : null };
+    }
+    return { links: [], folders: null };
+  }
+
+  $("importBtn").addEventListener("click", () => $("importFile").click());
+  $("importFile").addEventListener("change", async e => {
+    const f = e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    const result = readImport(await f.text());
+    if (!result.links.length) { toast("⚠️ Kunne ikke finde nogen genveje i filen."); return; }
+
+    pending = { ...result, fileName: f.name };
+    const urls = new Set(links.map(l => l.url));
+    const newCount = result.links.filter(l => !urls.has(l.url)).length;
+    $("iText").innerHTML =
+      `<b>${esc(f.name)}</b> indeholder <b>${result.links.length}</b> genveje, ` +
+      `heraf <b>${newCount}</b> du ikke har i forvejen. Du har nu <b>${links.length}</b> genveje.`;
+    $("iMerge").textContent = `Tilføj kun nye (${newCount})`;
+    $("iMerge").disabled = newCount === 0;
+    $("iReplace").textContent = `Erstat alle (${result.links.length})`;
+    idlg.showModal();
+  });
+
+  function finishImport(mode) {
+    if (!pending) return;
+    let added = 0;
+    if (mode === "replace") {
+      links = pending.links;
+      favs = new Set(links.filter(l => l.favorite).map(l => l.url));
+      added = links.length;
+    } else {
+      const urls = new Set(links.map(l => l.url));
+      pending.links.forEach(l => {
+        if (urls.has(l.url)) return;
+        const pos = links.map(x => x.category).lastIndexOf(l.category);
+        links.splice(pos >= 0 ? pos + 1 : links.length, 0, l);
+        if (l.favorite) favs.add(l.url);
+        urls.add(l.url);
+        added++;
+      });
+    }
+    if (pending.folders) {
+      store.set(FOLDERS_KEY, JSON.stringify({ ...folderMap(), ...pending.folders }));
+    }
+    pending = null;
+    idlg.close();
+    persist();
+    render();
+    toast(mode === "replace" ? `${added} genveje importeret` : `${added} nye genveje tilføjet`);
+  }
+
+  $("iReplace").addEventListener("click", () => finishImport("replace"));
+  $("iMerge").addEventListener("click", () => finishImport("merge"));
+  $("iCancel").addEventListener("click", () => { pending = null; idlg.close(); });
+
+  // ---------- Hændelser ----------
+  $("navItems").addEventListener("click", e => {
+    const b = e.target.closest("button[data-cat]");
+    if (!b) return;
+    active = b.dataset.cat;
+    render();
+  });
+
+  grid.addEventListener("click", e => {
+    const b = e.target.closest(".act");
+    if (!b) return;
+    e.preventDefault();
+    const i = Number(b.dataset.i);
+    if (b.classList.contains("edit")) { openDialog(i); return; }
+    const url = links[i].url;
+    favs.has(url) ? favs.delete(url) : favs.add(url);
+    saveFavs();
+    render();
+  });
+
+  const search = $("search");
+  search.addEventListener("input", () => { query = search.value.trim(); renderGrid(); });
+  search.addEventListener("keydown", e => {
+    if (e.key === "Enter" && firstUrl) window.open(firstUrl, "_blank", "noopener");
+    if (e.key === "Escape") { search.value = ""; query = ""; renderGrid(); }
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && !dlg.open && !fdlg.open && !idlg.open && document.activeElement !== search) {
+      e.preventDefault();
+      search.focus();
+    }
+  });
+
+  // Træk et link (fx fra adresselinjen) ind på siden
+  let internalDrag = false;
+  grid.addEventListener("dragstart", () => { internalDrag = true; });
+  document.addEventListener("dragend", () => { internalDrag = false; });
+  document.addEventListener("dragover", e => e.preventDefault());
+  document.addEventListener("drop", e => {
+    e.preventDefault();
+    if (internalDrag) { internalDrag = false; return; }
+    if (fdlg.open || idlg.open) return;
+    const dt = e.dataTransfer;
+    const moz = (dt.getData("text/x-moz-url") || "").split("\n");       // Firefox: url + sidetitel
+    const raw = moz[0] || (dt.getData("text/uri-list") || "").split("\n").find(x => x && !x.startsWith("#"))
+                       || dt.getData("text/plain") || "";
+    const url = normalizeUrl(raw);
+    if (/^(https?|file):/i.test(url)) {
+      if (dlg.open) { $("fUrl").value = url; fillFromUrl(); return; }
+      openDialog(-1, { url, name: (moz[1] || "").trim() || guessName(url), icon: guessIcon(url) });
+    } else if (dt.files && dt.files.length) {
+      toast("Browseren kan ikke se stien på filer trukket fra Stifinder. Højreklik på filen → Kopiér som sti, og indsæt i stedet.", 6000);
+    }
+  });
+
+  render();
+  search.focus();
+})();
+</script>
+</body>
+</html>
