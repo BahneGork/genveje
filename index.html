@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genveje</title>
+<style>
+:root {
+  --bg:#f4f6f8; --panel:#ffffff; --side:#1f2a37; --side-text:#cbd5e1;
+  --text:#1f2937; --muted:#6b7280; --accent:#0078d4; --hover:#eef6ff;
+  --border:#e5e7eb; --star:#f5b301;
+}
+:root[data-theme="dark"] {
+  --bg:#111827; --panel:#1f2937; --side:#0b1220; --side-text:#9ca3af;
+  --text:#e5e7eb; --muted:#9ca3af; --accent:#4ea8ff; --hover:#273449;
+  --border:#374151;
+}
+* { box-sizing:border-box; }
+html, body { margin:0; height:100%; }
+body { font-family:"Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--text); display:flex; }
+
+/* ---- Venstremenu ---- */
+nav { width:240px; flex-shrink:0; background:var(--side); color:var(--side-text);
+      padding:18px 0; overflow-y:auto; height:100vh; }
+nav h1 { font-size:18px; color:#fff; margin:0 20px 16px; }
+nav button { display:flex; justify-content:space-between; align-items:center; gap:8px;
+             width:100%; background:none; border:0; border-left:3px solid transparent;
+             color:inherit; font:inherit; text-align:left; padding:8px 20px 8px 17px; cursor:pointer; }
+nav button:hover { background:rgba(255,255,255,.06); }
+nav button.active { color:#fff; border-left-color:var(--accent); background:rgba(0,120,212,.2); }
+nav .count { font-size:12px; opacity:.7; }
+nav hr { border:0; border-top:1px solid rgba(255,255,255,.12); margin:8px 20px; }
+
+/* ---- Hovedområde ---- */
+main { flex:1; padding:20px 28px; overflow-y:auto; height:100vh; }
+.top { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+#search { flex:1; padding:10px 14px; font-size:16px; border:1px solid var(--border);
+          border-radius:8px; background:var(--panel); color:var(--text); }
+#search:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+.top button { padding:10px 14px; border:1px solid var(--border); border-radius:8px;
+              background:var(--panel); color:var(--text); cursor:pointer; font-size:15px; }
+#status { color:var(--muted); font-size:13px; margin:0 0 16px; }
+
+#grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:18px; align-items:start; }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.card h2 { font-size:15px; margin:0 0 8px; color:var(--accent); }
+
+.row { display:flex; align-items:center; border-radius:6px; }
+.row:hover { background:var(--hover); }
+.row.first { outline:2px solid var(--accent); outline-offset:-2px; }
+.row a { flex:1; display:flex; gap:10px; align-items:center; padding:7px 8px;
+         color:var(--text); text-decoration:none; min-width:0; }
+.icon { width:22px; text-align:center; flex-shrink:0; }
+.txt { min-width:0; }
+.name { display:block; }
+.sub { display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.star { background:none; border:0; cursor:pointer; font-size:18px; line-height:1;
+        color:var(--muted); padding:4px 10px; opacity:.3; }
+.row:hover .star { opacity:1; }
+.star.on { color:var(--star); opacity:1; }
+.empty { color:var(--muted); padding:40px 0; text-align:center; grid-column:1 / -1; }
+.hint { color:var(--muted); font-size:12px; margin-top:24px; }
+kbd { border:1px solid var(--border); border-radius:4px; padding:0 5px; font-size:11px; }
+</style>
+</head>
+<body>
+
+<nav id="nav"><h1>🏠 Genveje</h1><div id="navItems"></div></nav>
+
+<main>
+  <div class="top">
+    <input id="search" type="search" placeholder="Søg efter genvej… (tryk / for at søge)" autocomplete="off">
+    <button id="theme" title="Skift lyst/mørkt tema">🌓</button>
+  </div>
+  <div id="status"></div>
+  <div id="grid"></div>
+  <div class="hint"><kbd>/</kbd> søg &nbsp; <kbd>Enter</kbd> åbn første resultat &nbsp; <kbd>Esc</kbd> ryd søgning &nbsp; ★ markér favorit</div>
+</main>
+
+<!-- Linkene ligger i links.js i samme mappe -->
+<script src="links.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  const FAV_KEY = "genveje.favorites";
+  const THEME_KEY = "genveje.theme";
+  const ALL = "__all", FAV = "__fav";
+
+  // ---------- Hjælpefunktioner ----------
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g,
+    c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+  function shortUrl(url) {
+    try {
+      const u = new URL(url);
+      if (u.protocol === "file:") return decodeURIComponent(u.host ? "\\\\" + u.host + u.pathname.replace(/\//g, "\\") : u.pathname.replace(/^\//, ""));
+      return u.host + (u.pathname !== "/" ? u.pathname : "");
+    } catch (e) { return url; }
+  }
+
+  // ---------- Data ----------
+  const grid = document.getElementById("grid");
+  if (!Array.isArray(window.LINKS)) {
+    grid.innerHTML = '<div class="empty">Kunne ikke indlæse <b>links.js</b>. Ligger den i samme mappe som index.html, og er der en tastefejl (fx manglende komma)? Tryk F12 → Konsol for at se fejlen.</div>';
+    return;
+  }
+
+  const links = window.LINKS
+    .filter(l => l && l.name && l.url)
+    .map(l => ({ ...l, category: l.category || "Andet" }));
+
+  const categories = [];
+  links.forEach(l => { if (!categories.includes(l.category)) categories.push(l.category); });
+
+  let favs = null;
+  const saved = store.get(FAV_KEY);
+  if (saved) { try { favs = new Set(JSON.parse(saved)); } catch (e) {} }
+  if (!favs) favs = new Set(links.filter(l => l.favorite).map(l => l.url));
+
+  let active = ALL;
+  let query = "";
+  let firstUrl = null;
+
+  // ---------- Tema ----------
+  const root = document.documentElement;
+  const savedTheme = store.get(THEME_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = savedTheme || (prefersDark ? "dark" : "light");
+  document.getElementById("theme").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+    store.set(THEME_KEY, root.dataset.theme);
+  });
+
+  // ---------- Filtrering ----------
+  function visible() {
+    let list = links;
+    if (active === FAV) list = list.filter(l => favs.has(l.url));
+    else if (active !== ALL) list = list.filter(l => l.category === active);
+
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length) {
+      list = list.filter(l => {
+        const hay = [l.name, l.category, l.url, l.note, ...(l.tags || [])].join(" ").toLowerCase();
+        return terms.every(t => hay.includes(t));
+      });
+    }
+    return list;
+  }
+
+  // ---------- Venstremenu ----------
+  function renderNav() {
+    const btn = (key, label, count) =>
+      `<button data-cat="${esc(key)}" class="${key === active ? "active" : ""}">
+         <span>${label}</span><span class="count">${count}</span></button>`;
+
+    let html = btn(ALL, "📚 Alle", links.length)
+             + btn(FAV, "⭐ Favoritter", links.filter(l => favs.has(l.url)).length)
+             + "<hr>";
+    categories.forEach(c => {
+      html += btn(c, esc(c), links.filter(l => l.category === c).length);
+    });
+    document.getElementById("navItems").innerHTML = html;
+  }
+
+  // ---------- Hovedvisning ----------
+  function renderGrid() {
+    const list = visible();
+    firstUrl = list.length ? list[0].url : null;
+
+    const status = document.getElementById("status");
+    status.textContent = list.length === links.length
+      ? `${links.length} genveje`
+      : `Viser ${list.length} af ${links.length} genveje`;
+
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty">${active === FAV && !query
+        ? "Ingen favoritter endnu – klik på ★ ud for et link."
+        : "Ingen genveje matcher."}</div>`;
+      return;
+    }
+
+    let html = "";
+    let isFirst = true;
+    categories.forEach(c => {
+      const items = list.filter(l => l.category === c);
+      if (!items.length) return;
+      html += `<div class="card"><h2>${esc(c)}</h2>`;
+      items.forEach(l => {
+        const on = favs.has(l.url);
+        html += `<div class="row${isFirst && query ? " first" : ""}">
+          <a href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(l.url)}">
+            <span class="icon">${esc(l.icon || "🔗")}</span>
+            <span class="txt"><span class="name">${esc(l.name)}</span>
+              <span class="sub">${esc(l.note || shortUrl(l.url))}</span></span>
+          </a>
+          <button class="star${on ? " on" : ""}" data-url="${esc(l.url)}"
+            title="${on ? "Fjern fra favoritter" : "Tilføj til favoritter"}">${on ? "★" : "☆"}</button>
+        </div>`;
+        isFirst = false;
+      });
+      html += "</div>";
+    });
+    grid.innerHTML = html;
+  }
+
+  function render() { renderNav(); renderGrid(); }
+
+  // ---------- Hændelser ----------
+  document.getElementById("navItems").addEventListener("click", e => {
+    const b = e.target.closest("button[data-cat]");
+    if (!b) return;
+    active = b.dataset.cat;
+    render();
+  });
+
+  grid.addEventListener("click", e => {
+    const s = e.target.closest(".star");
+    if (!s) return;
+    e.preventDefault();
+    const url = s.dataset.url;
+    favs.has(url) ? favs.delete(url) : favs.add(url);
+    store.set(FAV_KEY, JSON.stringify([...favs]));
+    render();
+  });
+
+  const search = document.getElementById("search");
+  search.addEventListener("input", () => { query = search.value.trim(); renderGrid(); });
+  search.addEventListener("keydown", e => {
+    if (e.key === "Enter" && firstUrl) window.open(firstUrl, "_blank", "noopener");
+    if (e.key === "Escape") { search.value = ""; query = ""; renderGrid(); }
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && document.activeElement !== search) {
+      e.preventDefault();
+      search.focus();
+    }
+  });
+
+  render();
+  search.focus();
+})();
+</script>
+</body>
+</html>
