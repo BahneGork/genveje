@@ -413,8 +413,8 @@ window.GENVEJE = {
     {"id":"l-outlook","name":"Outlook","url":"https://outlook.cloud.microsoft/mail/","category":"c-m365","icon":"📧"},
     {"id":"l-excel","name":"Excel Online","url":"https://excel.cloud.microsoft/","category":"c-m365","icon":"📗"},
     {"id":"l-todo","name":"To Do","url":"https://to-do.office.com/","category":"c-m365","icon":"📋"},
-    {"id":"l-united","name":"United DK","url":"https://ragnsells1.sharepoint.com/sites/UnitedDK","category":"c-sp","icon":"📁","favorite":true},
-    {"id":"l-weee","name":"WEEE DK","url":"https://ragnsells1.sharepoint.com/sites/WEEE_DK","category":"c-sp","icon":"♻️","favorite":true,"tags":["WEEE","Rapportering"]}
+    {"id":"l-salg","name":"Salg","url":"https://contoso.sharepoint.com/sites/Salg","category":"c-sp","icon":"📁","favorite":true},
+    {"id":"l-weee","name":"Genbrug","url":"https://contoso.sharepoint.com/sites/Genbrug","category":"c-sp","icon":"♻️","favorite":true,"tags":["WEEE","Rapportering"]}
   ]
 };
 </script>
@@ -1846,10 +1846,10 @@ window.GENVEJE = {
         ]),
         shot("Tre genveje markeret.",
           demoCard("📁", "SharePoint", C3, [
-            demoRow("📁", "United DK", "ragnsells1.sharepoint.com/sites/UnitedDK", { pick: true, picked: true }),
-            demoRow("♻️", "WEEE DK", "ragnsells1.sharepoint.com/sites/WEEE_DK", { pick: true, picked: true }),
-            demoRow("📗", "WEEE 2026", "ragnsells1.sharepoint.com/sites/WEEE_DK/…/WEEE 2026.xlsx", { pick: true, picked: true }),
-            demoRow("📄", "Procedure", "ragnsells1.sharepoint.com/…/Procedure.docx", { pick: true })
+            demoRow("📁", "Salg", "contoso.sharepoint.com/sites/Salg", { pick: true, picked: true }),
+            demoRow("♻️", "Genbrug", "contoso.sharepoint.com/sites/Genbrug", { pick: true, picked: true }),
+            demoRow("📗", "WEEE 2026", "contoso.sharepoint.com/sites/Genbrug/…/WEEE 2026.xlsx", { pick: true, picked: true }),
+            demoRow("📄", "Procedure", "contoso.sharepoint.com/…/Procedure.docx", { pick: true })
           ]),
           el("div", { class: "selbar demo" },
             el("b", {}, "3 valgt"), demoBtn("Vælg alle viste (4)"), demoBtn("Ryd valg"), el("span", { class: "sep" }), co(1),
@@ -1876,7 +1876,7 @@ window.GENVEJE = {
           "Afprøv linket én gang, når du har lavet det."
         ]),
         shot("En genvej, der åbner i Excel.",
-          demoCard("📁", "SharePoint", C3, [demoRow("📗", "WEEE 2026", "ragnsells1.sharepoint.com/sites/WEEE_DK/Shared Documents/WEEE 2026.xlsx", { badge: "↗ Excel", co: co(1) })])),
+          demoCard("📁", "SharePoint", C3, [demoRow("📗", "WEEE 2026", "contoso.sharepoint.com/sites/Genbrug/Shared Documents/WEEE 2026.xlsx", { badge: "↗ Excel", co: co(1) })])),
         legend(["Mærket viser, at linket åbner filen i Excel i stedet for i browseren."])),
 
       sec("local", "11. Lokale filer og netværksdrev",

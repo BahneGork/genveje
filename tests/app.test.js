@@ -101,7 +101,7 @@ const blobText = b => b.text();
 
   console.log("4. Skrivebordsprogram for SharePoint-fil");
   click(w, $(w, "#addBtn"));
-  $(w, "#fUrl").value = "https://ragnsells1.sharepoint.com/sites/WEEE_DK/Shared%20Documents/WEEE%202026.xlsx";
+  $(w, "#fUrl").value = "https://contoso.sharepoint.com/sites/Genbrug/Shared%20Documents/WEEE%202026.xlsx";
   $(w, "#fUrl").dispatchEvent(new w.Event("input"));
   ok(!$(w, "#fDeskRow").hidden && $(w, "#fDeskLabel").textContent.includes("Excel"), "valget vises for SharePoint-xlsx");
   $(w, "#fUrl").dispatchEvent(new w.Event("change"));
@@ -113,7 +113,7 @@ const blobText = b => b.text();
   console.log("5. AND/OR med to tags");
   click(w, $(w, '#tagRow [data-tag="rapportering"]'));
   click(w, $(w, '#tagRow [data-tag="weee"]'));
-  ok($$(w, "#grid .row").length === 1, "AND: kun WEEE DK har begge");
+  ok($$(w, "#grid .row").length === 1, "AND: kun Genbrug har begge");
   click(w, $(w, '#tagRow [data-andor]'));
   ok($$(w, "#grid .row").length === 2, "OR: 2 genveje");
   click(w, $(w, '#tagRow [data-clear]'));
@@ -211,7 +211,7 @@ const blobText = b => b.text();
   console.log("13. Overgang fra den tidligere version (gamle browserdata)");
   const legacyLinks = [
     { category: "Power BI", name: "Fragtpriser", url: "https://app.powerbi.com/x", icon: "📊", tags: ["fragt"] },
-    { category: "SharePoint", name: "United DK", url: "https://ragnsells1.sharepoint.com/sites/UnitedDK", icon: "📁" },
+    { category: "SharePoint", name: "Salg", url: "https://contoso.sharepoint.com/sites/Salg", icon: "📁" },
     { category: "Power BI", name: "Produktion", url: "https://app.powerbi.com/y" }
   ];
   let dom5 = load({ "genveje.links": JSON.stringify(legacyLinks), "genveje.favorites": JSON.stringify(["https://app.powerbi.com/y"]) });
