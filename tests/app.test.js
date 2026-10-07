@@ -265,6 +265,31 @@ const blobText = b => b.text();
   click(w6, $(w6, '#navItems [data-view="__docs"]'));
   ok($(w6, "#typeRow").hidden, "type-rækken skjules i vejledningen");
 
+  console.log("16. Store kategorier foldes sammen på oversigten");
+  const links16 = [];
+  for (let i = 1; i <= 9; i++) links16.push({ id: "s" + i, name: "Stor " + i, url: `https://example.com/${i}`, category: "c-big" });
+  links16.push({ id: "k1", name: "Lille 1", url: "https://example.com/a", category: "c-small" }, { id: "k2", name: "Lille 2", url: "https://example.com/b", category: "c-small" },
+    { id: "u1", name: "Løs", url: "https://example.com/u" });
+  const cats16 = [{ id: "c-big", name: "Stor", icon: "📦", color: "#107c10" }, { id: "c-small", name: "Lille", icon: "📎", color: "#0078d4" }];
+  const w7 = load({ "genveje.state": JSON.stringify({ version: 2, links: links16, categories: cats16, tagColors: {} }) }).window;
+  const cardOf = name => $$(w7, "#grid .card").find(c => c.querySelector(".copen").textContent === name);
+  ok(!w7.__errors.length, "ingen fejl " + w7.__errors.join(" | "));
+  ok(cardOf("Stor").querySelectorAll(".row").length === 6 && cardOf("Stor").querySelector(".ccount").textContent === "9", "kategori med 9: viser 6, tæller 9");
+  ok(cardOf("Stor").querySelector(".more").textContent === "Vis alle 9 →", "“Vis alle 9 →” vises");
+  ok(cardOf("Lille").querySelectorAll(".row").length === 2 && !cardOf("Lille").querySelector(".more"), "lille kategori: alle vises, ingen “Vis alle”");
+  click(w7, $(w7, "#selBtn"));
+  click(w7, [...$$(w7, "#selbar button")].find(b => b.textContent.startsWith("Vælg alle viste")));
+  ok($(w7, "#selbar b").textContent === "9 valgt" && !$$(w7, "#grid .row:not(.picked)").length, "Vælg alle viste tager kun de 9 synlige (6 + 2 + 1)");
+  click(w7, $(w7, "#selBtn"));
+  click(w7, cardOf("Stor").querySelector(".more"));
+  ok($(w7, '#navItems [data-view="c-big"]').classList.contains("active") && $$(w7, "#grid .row").length === 9, "“Vis alle” åbner kategorien med alle 9");
+  click(w7, $(w7, '#navItems [data-view="__all"]'));
+  click(w7, cardOf("Lille").querySelector(".copen"));
+  ok($(w7, '#navItems [data-view="c-small"]').classList.contains("active") && $$(w7, "#grid .row").length === 2, "klik på kategoriens navn åbner kategorien");
+  click(w7, $(w7, '#navItems [data-view="__all"]'));
+  click(w7, cardOf("Uden kategori").querySelector(".copen"));
+  ok($(w7, '#navItems [data-view="__none"]').classList.contains("active") && $$(w7, "#grid .row").length === 1, "“Uden kategori” åbner også");
+
   console.log(failures ? `\n${failures} FEJL` : "\nAlle test bestået");
   process.exit(failures ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });
