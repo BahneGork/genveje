@@ -1,5 +1,11 @@
 # Ændringslog
 
+## 2.2
+
+- Nyt **Type-filter** over tag-filtrene: *Alle*, *📂 Mapper*, *📄 Filer* og *🌐 Weblinks*, med antal ud fra de øvrige filtre. Rækken vises kun, når der er mere end én slags genveje. En fil-sti uden filendelse regnes som en mappe; alt, der ikke er en fil-sti, er et weblink.
+- Når der filtreres (kategori, favoritter, søgning, type eller tags), får hver genvej sit eget kort i gitteret i stedet for én lang liste i kategoriens kort. Under *Alle* og *Favoritter* står kategorien nederst på kortet.
+- *Ryd filtre* nulstiller også typen.
+
 ## 2.1
 
 - Ny **📖 Vejledning** i venstremenuen med 14 afsnit, indholdsfortegnelse og 8 illustrationer med nummererede forklaringer. Illustrationerne er tegnet med sidens egne elementer, så de følger tema og version.

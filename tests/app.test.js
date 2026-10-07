@@ -48,6 +48,7 @@ const blobText = b => b.text();
   ok($$(w, "#grid .card").length === 3, "3 kategorikort vises");
   ok($$(w, "#navItems [data-view]").length === 6, "menu: Alle, Favoritter, Vejledning + 3 kategorier");
   ok(!$(w, "#tagRow").hidden && $$(w, "#tagRow [data-tag]").length === 2, "tag-rækken viser 2 tags");
+  ok($(w, "#typeRow").hidden, "type-rækken er skjult, når alle genveje er weblinks");
 
   console.log("1b. Vejledning");
   click(w, $(w, '#navItems [data-view="__docs"]'));
@@ -229,6 +230,40 @@ const blobText = b => b.text();
   d = $$(w4, "dialog").find(x => x.open && x.id === "");
   click(w4, [...d.querySelectorAll("button")].find(b => b.textContent.startsWith("Tilføj kun nye")));
   ok(state(w4).categories.some(c => c.name === "Lokale filer") && state(w4).links.some(l => l.name === "Test" && l.favorite), "v1-fil importeret med kategori og favorit");
+
+  console.log("15. Type-filter og ét kort pr. genvej");
+  const cats15 = [{ id: "c-x", name: "WEEE", icon: "♻️", color: "#107c10" }, { id: "c-y", name: "BI", icon: "📊", color: "#0078d4" }];
+  const links15 = [
+    { id: "a", name: "Rapporter", url: "file:///C:/Data/Rapporter/", category: "c-x", tags: ["WEEE"] },
+    { id: "b", name: "Arkiv", url: "file://///srv/arkiv", category: "c-x", tags: ["WEEE"] },
+    { id: "c", name: "Budget", url: "file:///C:/Data/Budget%202026.xlsx", category: "c-x", tags: ["WEEE"] },
+    { id: "d", name: "Q1", url: "file:///C:/Data/Q1.pdf", category: "c-x" },
+    { id: "e", name: "Power BI", url: "https://app.powerbi.com", category: "c-y", tags: ["WEEE"] }
+  ];
+  const w6 = load({ "genveje.state": JSON.stringify({ version: 2, links: links15, categories: cats15, tagColors: {} }) }).window;
+  const ct = k => $(w6, `#typeRow [data-kind="${k}"] .ct`).textContent;
+  const ids = () => $$(w6, "#grid .row").map(r => r.dataset.id).join("");
+  ok(!w6.__errors.length, "ingen fejl " + w6.__errors.join(" | "));
+  ok(!$(w6, "#typeRow").hidden && ct("") === "5" && ct("folder") === "2" && ct("file") === "2" && ct("web") === "1",
+    "type-rækken tæller 2 mapper (med og uden /), 2 filer og 1 weblink");
+  ok($$(w6, "#grid .card").length === 2 && !$(w6, "#grid .card.item"), "uden filter: ét kort pr. kategori");
+  click(w6, $(w6, '#typeRow [data-kind="folder"]'));
+  ok($$(w6, "#grid .card.item").length === 2 && ids() === "ab", "Mapper: hver mappe sit eget kort");
+  ok($$(w6, "#grid .ccat").every(c => c.textContent === "♻️ WEEE"), "kortet viser kategorien under Alle");
+  click(w6, $(w6, '#typeRow [data-kind="folder"]'));
+  ok(ids() === "abcde" && $(w6, '#typeRow [data-kind=""]').classList.contains("on"), "klik igen fjerner type-filteret");
+  click(w6, $(w6, '#navItems [data-view="c-x"]'));
+  ok($$(w6, "#grid .card.item").length === 4 && !$(w6, "#grid .ccat"), "kategori: hver genvej sit eget kort, uden kategorinavn");
+  ok(ct("web") === "0" && ct("file") === "2", "typetallene følger den valgte kategori");
+  click(w6, $(w6, '#tagRow [data-tag="weee"]'));
+  ok(ct("file") === "1", "typetallene følger tag-filteret");
+  click(w6, $(w6, '#typeRow [data-kind="file"]'));
+  ok(ids() === "c", "kategori + tag + type: kun Budget");
+  ok($$(w6, "#tagRow [data-tag]").length === 1 && $(w6, '#tagRow [data-tag="weee"] .ct').textContent === "1", "tag-tallet følger type-filteret");
+  click(w6, $(w6, '#tagRow [data-clear]'));
+  ok(ids() === "abcde" && !$(w6, "#grid .card.item") && $(w6, '#typeRow [data-kind=""]').classList.contains("on"), "Ryd filtre nulstiller også typen");
+  click(w6, $(w6, '#navItems [data-view="__docs"]'));
+  ok($(w6, "#typeRow").hidden, "type-rækken skjules i vejledningen");
 
   console.log(failures ? `\n${failures} FEJL` : "\nAlle test bestået");
   process.exit(failures ? 1 : 0);
