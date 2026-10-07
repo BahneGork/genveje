@@ -8,6 +8,7 @@ Det er **én HTML-fil** uden installation, server eller hjælpefiler. Dobbeltkli
 
 - Genveje til webadresser, SharePoint/OneDrive, lokale filer, netværksdrev og mapper. Windows-stier (`C:\…`, `\\server\…`) laves automatisk om til fillinks.
 - Kategorier med ikon, farve og rækkefølge, vist i venstremenuen og som farvede kort.
+- Type-filter: vis kun mapper, filer eller weblinks. Når der filtreres, får hver genvej sit eget kort.
 - Tags med tag-filtre. Hvert tag viser antal genveje, og filtrene kan matche **alle valgte** eller **mindst ét**. Tags kan farves, omdøbes, slås sammen og slettes.
 - Favoritter, søgning (`/`, `Enter` åbner første resultat) og lyst/mørkt tema.
 - **Tilføj fra mappe**: vælg en mappe og sæt flueben ved de filer og undermapper, du vil have med. Mappens sti huskes.
