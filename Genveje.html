@@ -287,6 +287,7 @@ dl.faq dd { margin:2px 0 0 0; }
     <button id="theme" class="btn" title="Skift lyst/mørkt tema">🌓</button>
   </div>
   <div id="typeRow" class="chips" hidden></div>
+  <div id="extRow" class="chips" hidden></div>
   <div id="tagRow" class="chips" hidden></div>
   <div id="status"></div>
   <div id="grid"></div>
@@ -671,7 +672,7 @@ window.GENVEJE = {
   }
   if (!D) D = fresh();
 
-  const UI = { view: ALL, q: "", kind: "", tags: new Set(), tagMode: "and", allTags: false, select: false, sel: new Set(), last: null, order: [] };
+  const UI = { view: ALL, q: "", kind: "", ext: "", tags: new Set(), tagMode: "and", allTags: false, select: false, sel: new Set(), last: null, order: [] };
   let firstLink = null;
 
   const catById = id => D.categories.find(c => c.id === id) || null;
@@ -748,6 +749,10 @@ window.GENVEJE = {
     if (path.endsWith("/")) return "folder";
     return /\.[a-z0-9]{1,5}$/i.test(path.slice(path.lastIndexOf("/") + 1)) ? "file" : "folder";
   }
+  // Filendelsen med lille begyndelsesbogstav (".xlsx"), eller "" for mapper og weblinks
+  function extOf(l) {
+    return kindOf(l) === "file" ? lc(String(l.url).split(/[?#]/)[0].match(/\.[a-z0-9]{1,5}$/i)[0]) : "";
+  }
   function matches(l, o = {}) {
     if (UI.view === FAV) { if (!l.favorite) return false; }
     else if (UI.view === NONE) { if (catOf(l)) return false; }
@@ -760,6 +765,7 @@ window.GENVEJE = {
       if (!terms.every(t => hay.includes(t))) return false;
     }
     if (!o.skipKind && UI.kind && kindOf(l) !== UI.kind) return false;
+    if (!o.skipExt && UI.ext && extOf(l) !== UI.ext) return false;
     if (!o.skipTags && UI.tags.size) {
       const lt = new Set((l.tags || []).map(lc)), sel = [...UI.tags];
       if (UI.tagMode === "and" ? !sel.every(t => lt.has(t)) : !sel.some(t => lt.has(t))) return false;
@@ -769,7 +775,7 @@ window.GENVEJE = {
   function toggleTag(key) { UI.tags.has(key) ? UI.tags.delete(key) : UI.tags.add(key); render(); }
   function clearFilters() {
     UI.q = ""; $("search").value = "";
-    UI.tags.clear(); UI.tagMode = "and"; UI.view = ALL; UI.kind = "";
+    UI.tags.clear(); UI.tagMode = "and"; UI.view = ALL; UI.kind = ""; UI.ext = "";
     render();
   }
 
@@ -811,7 +817,7 @@ window.GENVEJE = {
     if (new Set(D.links.map(kindOf)).size < 2 && !UI.kind) { row.hidden = true; row.replaceChildren(); return; }
     row.hidden = false;
     // Tallene viser hvor mange genveje typen giver med de øvrige filtre (kategori, søgning, tags)
-    const base = D.links.filter(l => matches(l, { skipKind: true }));
+    const base = D.links.filter(l => matches(l, { skipKind: true, skipExt: true }));
     fill(row,
       el("span", { class: "lab" }, "Type"),
       el("button", { class: "chip" + (UI.kind ? "" : " on"), "data-kind": "" }, "Alle", el("span", { class: "ct" }, base.length)),
@@ -822,6 +828,36 @@ window.GENVEJE = {
     const b = e.target.closest("[data-kind]");
     if (!b) return;
     UI.kind = UI.kind === b.dataset.kind ? "" : b.dataset.kind;
+    UI.ext = "";
+    render();
+  });
+
+  // ---------- Filendelser (.xlsx, .pdf …) ----------
+  // Endelserne læses fra de filer, de øvrige filtre giver, så rækken altid passer til det, man ser
+  function renderExtRow() {
+    const row = $("extRow");
+    const counts = new Map();
+    if (!UI.kind || UI.kind === "file")
+      D.links.filter(l => matches(l, { skipKind: true, skipExt: true })).forEach(l => {
+        const x = extOf(l);
+        if (x) counts.set(x, (counts.get(x) || 0) + 1);
+      });
+    if (UI.ext && !counts.has(UI.ext)) counts.set(UI.ext, 0);
+    // Én endelse giver ikke noget at vælge imellem (det klarer "Filer")
+    if (counts.size < 2 && !UI.ext) { row.hidden = true; row.replaceChildren(); return; }
+    row.hidden = false;
+    const exts = [...counts].sort((a, b) => (b[1] - a[1]) || a[0].localeCompare(b[0]));
+    fill(row,
+      el("span", { class: "lab" }, "Endelse"),
+      exts.map(([x, n]) => el("button", { class: "chip" + (UI.ext === x ? " on" : ""), "data-ext": x, title: UI.ext === x ? "Fjern filter" : `Vis kun ${x}-filer` },
+        x, el("span", { class: "ct" }, n))));
+  }
+  $("extRow").addEventListener("click", e => {
+    const b = e.target.closest("[data-ext]");
+    if (!b) return;
+    UI.ext = UI.ext === b.dataset.ext ? "" : b.dataset.ext;
+    // En endelse viser kun filer, så Filer-knappen markeres også
+    if (UI.ext) UI.kind = "file";
     render();
   });
 
@@ -940,8 +976,8 @@ window.GENVEJE = {
     renderNav();
     $("docs").hidden = !docs;
     $("status").hidden = $("grid").hidden = $("hintBar").hidden = docs;
-    if (docs) { $("typeRow").hidden = $("tagRow").hidden = true; renderDocs(); }
-    else { renderTypeRow(); renderTagRow(); renderGrid(); }
+    if (docs) { $("typeRow").hidden = $("extRow").hidden = $("tagRow").hidden = true; renderDocs(); }
+    else { renderTypeRow(); renderExtRow(); renderTagRow(); renderGrid(); }
     renderSelBar();
     $("selBtn").classList.toggle("on", UI.select);
   }
@@ -1819,6 +1855,7 @@ window.GENVEJE = {
         P("Har du både mapper, filer og weblinks, vises en ", B("Type"), "-række over tag-filtrene. Klik på ", B("📂 Mapper"), ", ", B("📄 Filer"), " eller ", B("🌐 Weblinks"), " for kun at se den slags – klik igen eller på ", B("Alle"), " for at fjerne filteret."),
         UL([
           "Tallene viser, hvor mange genveje typen giver med den kategori, søgning og de tags, du har valgt.",
+          ["Under ", B("Alle"), " og ", B("📄 Filer"), " vises også en ", B("Endelse"), "-række med de filendelser (fx .xlsx og .pdf), der findes blandt de viste filer. Klik på en endelse for kun at se de filer – klik igen for at fjerne filteret. Rækken vises kun, når der er mindst to forskellige endelser."],
           "En fil- eller netværkssti uden filendelse (fx C:\\Data\\Rapporter) regnes som en mappe. Alt, der ikke er en fil-sti, regnes som et weblink – også SharePoint.",
           "Så snart du filtrerer – på kategori, favoritter, søgning, type eller tags – får hver genvej sit eget kort, så resultatet fylder hele bredden. Kategorien står nederst på kortet."
         ]),

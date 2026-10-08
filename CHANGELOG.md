@@ -5,6 +5,7 @@
 - Kategorikortene på oversigten viser højst 6 genveje. Har en kategori flere, åbner **Vis alle** kategorien.
 - Klik på kategoriens navn i kortet åbner kategorien, ligesom i venstremenuen.
 - *Vælg alle viste* og Shift+klik under *Markér* omfatter kun de genveje, der kan ses.
+- Ny **Endelse**-række under type-filteret: de filendelser (.xlsx, .pdf …), der findes blandt de viste filer, med antal. Vises under *Alle* og *📄 Filer*, når der er mindst to forskellige endelser. En endelse markerer også *Filer*; *Mapper*, *Weblinks* og *Ryd filtre* fjerner den.
 
 ## 2.2
 
