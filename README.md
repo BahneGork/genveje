@@ -7,7 +7,7 @@ Det er **én HTML-fil** uden installation, server eller hjælpefiler. Dobbeltkli
 ## Funktioner
 
 - Genveje til webadresser, SharePoint/OneDrive, lokale filer, netværksdrev og mapper. Windows-stier (`C:\…`, `\\server\…`) laves automatisk om til fillinks.
-- Kategorier med ikon, farve og rækkefølge, vist i venstremenuen og som farvede kort.
+- Kategorier med ikon, farve og rækkefølge, vist i venstremenuen og som farvede kort. Et kort viser højst 6 genveje; klik på navnet eller "Vis alle" for at åbne kategorien.
 - Type-filter: vis kun mapper, filer eller weblinks. Når der filtreres, får hver genvej sit eget kort.
 - Tags med tag-filtre. Hvert tag viser antal genveje, og filtrene kan matche **alle valgte** eller **mindst ét**. Tags kan farves, omdøbes, slås sammen og slettes.
 - Favoritter, søgning (`/`, `Enter` åbner første resultat) og lyst/mørkt tema.

@@ -93,6 +93,12 @@ body.selecting main { padding-bottom:90px; }
 .cicon { font-size:17px; }
 .ccount { font-size:12px; color:var(--muted); }
 .chead .act { opacity:0; }
+.copen { display:block; width:100%; background:none; border:0; padding:0; font:inherit; color:inherit; text-align:left; cursor:pointer;
+         overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copen:hover { color:var(--accent); text-decoration:underline; }
+.more { display:block; width:100%; background:none; border:0; border-radius:6px; padding:6px 8px 2px; font:inherit; font-size:13px;
+        color:var(--accent); text-align:left; cursor:pointer; }
+.more:hover { text-decoration:underline; }
 .card.item { padding:4px 4px 6px; }
 .ccat { font-size:12px; color:var(--muted); padding:0 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card:hover .chead .act { opacity:.7; }
@@ -429,8 +435,9 @@ window.GENVEJE = {
     state: "genveje.state", base: "genveje.base", theme: "genveje.theme", dirty: "genveje.dirty",
     folders: "genveje.folders", legacyLinks: "genveje.links", legacyFavs: "genveje.favorites"
   };
-  const APP_VERSION = "2.2";
+  const APP_VERSION = "2.3";
   const ALL = "__all", FAV = "__fav", NONE = "__none", DOCS = "__docs";
+  const CARD_LIMIT = 6;   // højst så mange genveje i et kategorikort på oversigten; resten ses ved at åbne kategorien
   const COLORS = ["#0078d4","#107c10","#d83b01","#b4009e","#5c2d91","#008272","#c50f1f","#986f0b","#4f6bed","#69797e"];
   const EMOJIS = ["📊","📁","📂","📗","📘","📙","📕","📄","⚙️","📧","📋","♻️","🔗","⭐","🛠️","💰","🚚","👥","🏭","📅"];
   const APPNAME = { "ms-excel":"Excel", "ms-word":"Word", "ms-powerpoint":"PowerPoint" };
@@ -884,7 +891,9 @@ window.GENVEJE = {
       { c: null, items: list.filter(l => !catOf(l)) }
     ].filter(g => g.items.length);
     const ordered = groups.flatMap(g => g.items);
-    UI.order = ordered.map(l => l.id);
+    const filtered = !!(UI.view !== ALL || UI.q || UI.kind || UI.tags.size);
+    // Kun de viste genveje kan markeres med Shift+klik og "Vælg alle viste"
+    UI.order = (filtered ? ordered : groups.flatMap(g => g.items.slice(0, CARD_LIMIT))).map(l => l.id);
     firstLink = UI.order.length ? linkById(UI.order[0]) : null;
 
     $("status").textContent = (list.length === D.links.length
@@ -901,7 +910,7 @@ window.GENVEJE = {
     }
     // Med et filter (kategori, favoritter, søgning, type eller tags) får hver genvej sit eget kort,
     // så resultatet fylder hele bredden i stedet for én lang liste i ét kategorikort
-    if (UI.view !== ALL || UI.q || UI.kind || UI.tags.size) {
+    if (filtered) {
       const showCat = UI.view === ALL || UI.view === FAV;
       grid.replaceChildren(...ordered.map(l => {
         const c = catOf(l);
@@ -910,14 +919,19 @@ window.GENVEJE = {
       }));
       return;
     }
-    grid.replaceChildren(...groups.map(({ c, items }) =>
-      el("section", { class: "card", style: { "--c": c ? c.color : "var(--border)" } },
+    // Oversigten: ét kort pr. kategori. Navnet åbner kategorien som i venstremenuen; har den mere end
+    // CARD_LIMIT genveje, vises de første, og "Vis alle" åbner resten
+    grid.replaceChildren(...groups.map(({ c, items }) => {
+      const key = c ? c.id : NONE;
+      return el("section", { class: "card", style: { "--c": c ? c.color : "var(--border)" } },
         el("div", { class: "chead" },
           el("span", { class: "cicon" }, c ? c.icon : "•"),
-          el("h2", {}, c ? c.name : "Uden kategori"),
+          el("h2", {}, el("button", { class: "copen", "data-opencat": key, title: "Åbn kategorien" }, c ? c.name : "Uden kategori")),
           el("span", { class: "ccount" }, items.length),
           c ? el("button", { class: "act", title: "Redigér kategori", "data-catedit": c.id }, "✎") : null),
-        items.map(rowEl))));
+        items.slice(0, CARD_LIMIT).map(rowEl),
+        items.length > CARD_LIMIT ? el("button", { class: "more", "data-opencat": key }, `Vis alle ${items.length} →`) : null);
+    }));
   }
 
   function render() {
@@ -937,6 +951,8 @@ window.GENVEJE = {
   grid.addEventListener("click", e => {
     const t = e.target;
     if (t.closest("[data-clear]")) { clearFilters(); return; }
+    const oc = t.closest("[data-opencat]");
+    if (oc) { UI.view = oc.dataset.opencat; render(); $("main").scrollTop = 0; return; }
     const row = t.closest(".row");
     if (UI.select && row) { e.preventDefault(); pick(row.dataset.id, e.shiftKey); return; }
     const tag = t.closest("[data-tag]");
@@ -1684,7 +1700,7 @@ window.GENVEJE = {
           "Venstremenuen: Alle genveje, Favoritter, denne vejledning og dine kategorier. Nederst ligger værktøjer til tags, backup og import.",
           "Søgefeltet og knapperne til at tilføje genveje, markere flere og skifte mellem lyst og mørkt tema.",
           "Tag-filtrene – klik på et tag for kun at se genveje med det.",
-          "Ét kort pr. kategori, med kategoriens farve øverst. Når du filtrerer, får hver genvej sit eget kort. Hold musen over en genvej for at se ✎ (redigér) og ☆ (favorit)."
+          "Ét kort pr. kategori, med kategoriens farve øverst. Et kort viser højst 6 genveje – klik på kategoriens navn eller “Vis alle” for at åbne kategorien. Når du filtrerer, får hver genvej sit eget kort. Hold musen over en genvej for at se ✎ (redigér) og ☆ (favorit)."
         ]),
         H3("Hvor gemmes mine genveje?"),
         P("Alt hvad du gør, gemmes ", B("automatisk og med det samme i browseren"), ". Selve filen Genveje.html ændres ikke af sig selv – browsere må ikke skrive i filer på din disk. Derfor er det en god idé ind imellem at gemme en kopi eller tage en backup. Det er forklaret under ",
@@ -1769,7 +1785,8 @@ window.GENVEJE = {
           [B("Redigér"), ": hold musen over kategorien i menuen og klik ✎, eller klik ✎ i kortets overskrift. Du kan ændre navn, ikon og farve."],
           [B("Rækkefølge"), ": ↑ og ↓ i redigeringsdialogen flytter kategorien op og ned i menuen og på siden."],
           [B("Slet"), ": genvejene i kategorien bliver ikke slettet – de flyttes til “Uden kategori”."],
-          [B("Vis kun én kategori"), ": klik på den i venstremenuen. Klik på 📚 Alle for at se alt igen."],
+          [B("Vis kun én kategori"), ": klik på den i venstremenuen eller på kategoriens navn i kortet. Klik på 📚 Alle for at se alt igen."],
+          [B("Store kategorier"), ": på oversigten viser et kort højst 6 genveje. Har kategorien flere, åbner “Vis alle” hele kategorien."],
           "“Uden kategori” vises i menuen, når der er genveje uden kategori."
         ]),
         shot("Redigering af en kategori.",

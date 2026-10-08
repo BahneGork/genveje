@@ -1,5 +1,11 @@
 # Ændringslog
 
+## 2.3
+
+- Kategorikortene på oversigten viser højst 6 genveje. Har en kategori flere, åbner **Vis alle** kategorien.
+- Klik på kategoriens navn i kortet åbner kategorien, ligesom i venstremenuen.
+- *Vælg alle viste* og Shift+klik under *Markér* omfatter kun de genveje, der kan ses.
+
 ## 2.2
 
 - Nyt **Type-filter** over tag-filtrene: *Alle*, *📂 Mapper*, *📄 Filer* og *🌐 Weblinks*, med antal ud fra de øvrige filtre. Rækken vises kun, når der er mere end én slags genveje. En fil-sti uden filendelse regnes som en mappe; alt, der ikke er en fil-sti, er et weblink.
