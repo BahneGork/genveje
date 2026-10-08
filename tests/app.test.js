@@ -290,6 +290,37 @@ const blobText = b => b.text();
   click(w7, cardOf("Uden kategori").querySelector(".copen"));
   ok($(w7, '#navItems [data-view="__none"]').classList.contains("active") && $$(w7, "#grid .row").length === 1, "“Uden kategori” åbner også");
 
+  console.log("17. Filter på filendelse");
+  const links17 = [
+    { id: "a", name: "Mappe", url: "file:///C:/Data/", category: "c-x" },
+    { id: "b", name: "Budget", url: "file:///C:/Data/Budget.xlsx", category: "c-x", tags: ["T"] },
+    { id: "c", name: "Salg", url: "file:///C:/Data/Salg.XLSX", category: "c-y" },
+    { id: "d", name: "Notat", url: "file:///C:/Data/Notat.pdf", category: "c-x", tags: ["T"] },
+    { id: "e", name: "Web", url: "https://example.com/rapport.pdf", category: "c-x" }
+  ];
+  const w8 = load({ "genveje.state": JSON.stringify({ version: 2, links: links17, categories: cats15, tagColors: {} }) }).window;
+  const exts = () => $$(w8, "#extRow [data-ext]").map(b => b.dataset.ext + b.querySelector(".ct").textContent).join(" ");
+  const ids8 = () => $$(w8, "#grid .row").map(r => r.dataset.id).join("");
+  ok(!w8.__errors.length, "ingen fejl " + w8.__errors.join(" | "));
+  ok(!$(w8, "#extRow").hidden && exts() === ".xlsx2 .pdf1", "endelser læses fra filerne (store/små bogstaver ens, weblinks tæller ikke)");
+  click(w8, $(w8, '#extRow [data-ext=".xlsx"]'));
+  ok(ids8() === "bc" && $(w8, '#typeRow [data-kind="file"]').classList.contains("on"), ".xlsx: kun regneark, og Filer markeres");
+  ok($(w8, '#typeRow [data-kind="file"] .ct').textContent === "3", "Filer-tallet tæller alle filer");
+  click(w8, $(w8, '#extRow [data-ext=".xlsx"]'));
+  ok(ids8() === "bdc" && $(w8, '#typeRow [data-kind="file"]').classList.contains("on"), "klik igen fjerner endelsen, Filer bliver");
+  click(w8, $(w8, '#extRow [data-ext=".pdf"]'));
+  click(w8, $(w8, '#typeRow [data-kind="folder"]'));
+  ok(ids8() === "a" && $(w8, "#extRow").hidden, "Mapper fjerner endelsen og skjuler rækken");
+  click(w8, $(w8, '#typeRow [data-kind="folder"]'));
+  click(w8, $(w8, '#tagRow [data-tag="t"]'));
+  ok(exts() === ".pdf1 .xlsx1", "endelserne følger tag-filteret");
+  click(w8, $(w8, '#navItems [data-view="c-y"]'));
+  ok($(w8, "#extRow").hidden, "kun én endelse i det viste: rækken skjules");
+  click(w8, $(w8, '#tagRow [data-clear]'));
+  click(w8, $(w8, '#extRow [data-ext=".pdf"]'));
+  click(w8, $(w8, '#tagRow [data-clear]'));
+  ok(ids8() === "abdec" && !$(w8, "#extRow .chip.on"), "Ryd filtre nulstiller også endelsen");
+
   console.log(failures ? `\n${failures} FEJL` : "\nAlle test bestået");
   process.exit(failures ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });
