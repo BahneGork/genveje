@@ -315,6 +315,7 @@ dl.faq dd { margin:2px 0 0 0; }
     <div id="fDeskRow" hidden>
       <label class="check"><input type="checkbox" id="fDesk"> <span id="fDeskLabel">Åbn i Excel i stedet for browseren</span></label>
       <small>Virker med lokale filer, netværksdrev og den direkte adresse til en Office-fil på SharePoint/OneDrive. Browseren spørger første gang, om den må åbne programmet – test linket én gang.</small>
+      <div id="fDeskWarn" class="warn" hidden>Filnavnet eller en mappe i stien indeholder æ, ø, å eller et andet særligt bogstav. Så kan Excel, Word og PowerPoint ikke finde filen via et link fra browseren, og genvejen åbner som et almindeligt link. Omdøb filen/mappen uden de bogstaver, hvis den skal åbne i programmet.</div>
     </div>
 
     <label>Navn *
@@ -391,7 +392,7 @@ dl.faq dd { margin:2px 0 0 0; }
           <div id="fdTagsBox"></div>
         </div>
       </div>
-      <label class="check"><input type="checkbox" id="fdDesk" checked> Åbn Excel-, Word- og PowerPoint-filer i programmet i stedet for browseren</label>
+      <label class="check"><input type="checkbox" id="fdDesk" checked> Åbn Excel-, Word- og PowerPoint-filer i programmet i stedet for browseren (ikke muligt for filer med æ, ø eller å i navnet eller stien)</label>
     </div>
 
     <div class="btns">
@@ -573,16 +574,22 @@ window.GENVEJE = {
     if (["pptx","pptm","ppt"].includes(ext)) return "ms-powerpoint";
     return null;
   }
-  function hrefOf(l) {
-    const app = l.desktop ? officeApp(l.url) : null;
-    if (!app) return l.url;
-    // Lokale filer: Excel finder ikke filen, hvis stien er %-kodet (mellemrum som %20, æøå osv.),
-    // så stien skrives som den står. decodeURI lader %23 (#) og andre reserverede tegn være kodet,
-    // da et # ellers ville afslutte adressen.
-    return `${app}:ofe|u|${/^file:/i.test(l.url) ? plainFileUrl(l.url) : l.url}`;
-  }
-  function plainFileUrl(u) {
+  // Adressen med %-koder afkodet. decodeURI lader %23 (#) og andre reserverede tegn være kodet,
+  // da et # ellers ville afslutte adressen.
+  function plainUrl(u) {
     try { return decodeURI(u); } catch (e) { return u; }
+  }
+  // Æ, ø, å og andre tegn uden for ASCII i adressen. Browseren koder dem altid som UTF-8 (å → %C3%A5)
+  // i et ms-excel:-link, og det kan Office ikke afkode ("Vi kunne ikke finde …"). Afprøvet i Edge
+  // med både UTF-8- og Windows-1252-koder (%E5) – ingen af dem virker.
+  const hasSpecialChars = u => /[^\x00-\x7F]/.test(plainUrl(u));
+  // Det program genvejen faktisk åbner i: kun når valget er slået til, og adressen kan bruges
+  const desktopApp = l => (l.desktop && !hasSpecialChars(l.url)) ? officeApp(l.url) : null;
+  function hrefOf(l) {
+    const app = desktopApp(l);
+    if (!app) return l.url;
+    // Lokale filer: stien skrives uden %-kodning (mellemrum som de er)
+    return `${app}:ofe|u|${/^file:/i.test(l.url) ? plainUrl(l.url) : l.url}`;
   }
   const isWebHref = h => /^(https?|file):/i.test(h);
   function openHref(h) {
@@ -913,7 +920,7 @@ window.GENVEJE = {
 
   function rowEl(l) {
     const sel = UI.select, on = UI.sel.has(l.id), href = hrefOf(l), web = isWebHref(href);
-    const app = l.desktop ? officeApp(l.url) : null;
+    const app = desktopApp(l);
     return el("div", { class: "row" + (sel ? " selmode" : "") + (on ? " picked" : "") + (UI.q && !sel && firstLink === l ? " first" : ""), "data-id": l.id },
       sel ? el("span", { class: "pickbox" }, on ? "☑" : "☐") : null,
       el("a", { href, target: web ? "_blank" : null, rel: web ? "noopener" : null, title: l.url },
@@ -1060,8 +1067,14 @@ window.GENVEJE = {
 
   // Slå "Åbn i Excel/Word/PowerPoint" til eller fra for de markerede Office-filer
   function bulkDesktop() {
-    const ls = selectedLinks(), office = ls.filter(l => officeApp(l.url)), other = ls.length - office.length;
-    if (!office.length) { toast("Ingen af de valgte genveje er Excel-, Word- eller PowerPoint-filer"); return; }
+    const ls = selectedLinks(), allOffice = ls.filter(l => officeApp(l.url));
+    const office = allOffice.filter(l => !hasSpecialChars(l.url)), special = allOffice.length - office.length;
+    const other = ls.length - allOffice.length;
+    if (!office.length) {
+      toast(special ? "De valgte Office-filer har æ, ø eller å i navnet eller stien og kan ikke åbnes i programmet via et link"
+                    : "Ingen af de valgte genveje er Excel-, Word- eller PowerPoint-filer", 6000);
+      return;
+    }
     const on = office.filter(l => l.desktop).length;
     const apply = to => d => {
       office.forEach(l => { if (to) l.desktop = true; else delete l.desktop; });
@@ -1071,6 +1084,7 @@ window.GENVEJE = {
     const d = modal(`Åbn i program – ${plural(office.length, "Office-fil", "Office-filer")}`, [
       el("p", {}, `${office.length - on} af ${office.length} åbnes i dag i browseren eller hentes som en kopi; ${on} åbnes allerede i Excel, Word eller PowerPoint.`),
       other ? el("small", {}, `${plural(other, "valgt genvej", "valgte genveje")} er ikke Office-filer og bliver ikke ændret.`) : null,
+      special ? el("small", {}, `${plural(special, "Office-fil", "Office-filer")} har æ, ø eller å i navnet eller stien. Dem kan programmet ikke finde via et link, så de bliver ikke ændret.`) : null,
       el("small", {}, "Virker med lokale filer, netværksdrev og direkte SharePoint/OneDrive-adresser til filen.")
     ], [
       cancelBtn(),
@@ -1340,9 +1354,12 @@ window.GENVEJE = {
   let deskTouched = false;
   $("fDesk").addEventListener("change", () => { deskTouched = true; });
   function updateDesk() {
-    const url = normalizeUrl($("fUrl").value), app = officeApp(url);
+    const url = normalizeUrl($("fUrl").value), app = officeApp(url), special = !!app && hasSpecialChars(url);
     $("fDeskRow").hidden = !app;
     if (app) $("fDeskLabel").textContent = `Åbn i ${APPNAME[app]} i stedet for browseren`;
+    $("fDeskWarn").hidden = !special;
+    $("fDesk").disabled = special;
+    if (special) { $("fDesk").checked = false; return; }
     // Nye lokale Office-filer åbnes som standard i programmet (Edge henter ellers en kopi)
     if (!editId && !deskTouched) $("fDesk").checked = !!app && /^file:/i.test(url);
   }
@@ -1397,7 +1414,7 @@ window.GENVEJE = {
     if (tags.length) item.tags = tags;
     if (note) item.note = note;
     if ($("fFav").checked) item.favorite = true;
-    if ($("fDesk").checked && officeApp(url)) item.desktop = true;
+    if ($("fDesk").checked && officeApp(url) && !hasSpecialChars(url)) item.desktop = true;
 
     if (editId) {
       const i = D.links.findIndex(l => l.id === editId);
@@ -1588,7 +1605,7 @@ window.GENVEJE = {
       if (existing.has(url)) return;
       const item = { id: "l-" + uid(), name: f.dir ? f.name : (f.name.replace(/\.[^.]+$/, "") || f.name), url, category: cat, icon: f.dir ? "📂" : guessIcon(url) };
       if (tags.length) item.tags = tags.slice();
-      if (!f.dir && $("fdDesk").checked && officeApp(url)) item.desktop = true;
+      if (!f.dir && $("fdDesk").checked && officeApp(url) && !hasSpecialChars(url)) item.desktop = true;
       D.links.push(item);
       existing.add(url);
       f.dir ? nDirs++ : nFiles++;
@@ -1971,6 +1988,7 @@ window.GENVEJE = {
           "Valget “Åbn i Excel i stedet for browseren” dukker op i dialogen, når adressen ender på et Office-filnavn (.xlsx, .xlsm, .xlsb, .xls, .csv, .docx, .docm, .doc, .pptx, .pptm, .ppt).",
           ["Har du mange genveje, så slå det til for dem alle på én gang: ", B("☑ Markér"), " → ", B("↗ Åbn i program…"), "."],
           "Delingslinks uden filnavn i adressen (fx …/:x:/g/…) giver ikke valget. Brug den direkte adresse, der ender på filnavnet.",
+          [B("Ikke med æ, ø og å"), ": har filnavnet eller en mappe i stien æ, ø, å eller et andet særligt bogstav, kan programmet ikke finde filen via et link fra browseren. Valget kan da ikke slås til, og genvejen åbner som et almindeligt link. Omdøb filen eller mappen, hvis den skal åbne i programmet."],
           "Genveje der åbner i et program, er mærket med fx “↗ Excel”.",
           "Første gang spørger browseren, om den må åbne programmet. Office skal være installeret på pc'en.",
           "Afprøv linket én gang, når du har lavet det."
@@ -2030,7 +2048,7 @@ window.GENVEJE = {
           el("dt", {}, "Et link til en lokal fil eller et netværksdrev åbner ikke"),
           el("dd", {}, "Tjek at stien stadig passer (er filen flyttet eller omdøbt?), og at netværksdrevet er tilgængeligt. Firmaets browserindstillinger kan også blokere fillinks."),
           el("dt", {}, "“Åbn i Excel” virker ikke"),
-          el("dd", {}, "Tjek at adressen er den direkte adresse til filen (ender på fx .xlsx), at filen stadig ligger der, at Office er installeret, og at du har sagt ja, da browseren spurgte om at åbne programmet. Siger Excel, at filen ikke kan findes, så tjek stien under ✎."),
+          el("dd", {}, "Tjek at adressen er den direkte adresse til filen (ender på fx .xlsx), at filen stadig ligger der, at Office er installeret, og at du har sagt ja, da browseren spurgte om at åbne programmet. Siger Excel, at filen ikke kan findes, så tjek stien under ✎. Har filnavnet eller mappestien æ, ø eller å, virker valget ikke – se afsnit 10."),
           el("dt", {}, "Filen åbner skrivebeskyttet"),
           el("dd", {}, "Åbn den fra Stifinder. Er den også skrivebeskyttet der, er det filen eller mappen: filen er markeret som skrivebeskyttet, gemt som “Åbn altid skrivebeskyttet”, åben et andet sted, eller du mangler skriveadgang til mappen."),
           el("dt", {}, "Siden viser en fejl om genvejslisten"),
