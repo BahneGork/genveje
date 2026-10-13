@@ -314,7 +314,8 @@ dl.faq dd { margin:2px 0 0 0; }
 
     <div id="fDeskRow" hidden>
       <label class="check"><input type="checkbox" id="fDesk"> <span id="fDeskLabel">Åbn i Excel i stedet for browseren</span></label>
-      <small>Virker med den direkte adresse til en Office-fil på SharePoint/OneDrive. Browseren spørger første gang, om den må åbne programmet – test linket én gang.</small>
+      <small>Virker med lokale filer, netværksdrev og den direkte adresse til en Office-fil på SharePoint/OneDrive. Browseren spørger første gang, om den må åbne programmet – test linket én gang.</small>
+      <div id="fDeskWarn" class="warn" hidden>Filnavnet eller en mappe i stien indeholder æ, ø, å eller et andet særligt bogstav. Så kan Excel, Word og PowerPoint ikke finde filen via et link fra browseren, og genvejen åbner som et almindeligt link. Omdøb filen/mappen uden de bogstaver, hvis den skal åbne i programmet.</div>
     </div>
 
     <label>Navn *
@@ -391,6 +392,7 @@ dl.faq dd { margin:2px 0 0 0; }
           <div id="fdTagsBox"></div>
         </div>
       </div>
+      <label class="check"><input type="checkbox" id="fdDesk" checked> Åbn Excel-, Word- og PowerPoint-filer i programmet i stedet for browseren (ikke muligt for filer med æ, ø eller å i navnet eller stien)</label>
     </div>
 
     <div class="btns">
@@ -436,7 +438,7 @@ window.GENVEJE = {
     state: "genveje.state", base: "genveje.base", theme: "genveje.theme", dirty: "genveje.dirty",
     folders: "genveje.folders", legacyLinks: "genveje.links", legacyFavs: "genveje.favorites"
   };
-  const APP_VERSION = "2.3";
+  const APP_VERSION = "2.4";
   const ALL = "__all", FAV = "__fav", NONE = "__none", DOCS = "__docs";
   const CARD_LIMIT = 6;   // højst så mange genveje i et kategorikort på oversigten; resten ses ved at åbne kategorien
   const COLORS = ["#0078d4","#107c10","#d83b01","#b4009e","#5c2d91","#008272","#c50f1f","#986f0b","#4f6bed","#69797e"];
@@ -560,9 +562,11 @@ window.GENVEJE = {
     return "🔗";
   }
 
-  // Office-fil på en webadresse → hvilket skrivebordsprogram kan åbne den
+  // Office-fil → hvilket skrivebordsprogram kan åbne den. Virker med webadresser (SharePoint/OneDrive)
+  // og med lokale filer og netværksdrev (file://); i Edge er det den eneste måde at åbne en lokal
+  // Office-fil i programmet i stedet for at hente en kopi.
   function officeApp(url) {
-    if (!/^https?:\/\//i.test(url || "")) return null;
+    if (!/^(https?|file):/i.test(url || "")) return null;
     let ext;
     try { ext = (lc(decodeURIComponent(new URL(url).pathname)).match(/\.([a-z0-9]+)$/) || [])[1]; } catch (e) { return null; }
     if (["xlsx","xlsm","xlsb","xls","csv"].includes(ext)) return "ms-excel";
@@ -570,9 +574,22 @@ window.GENVEJE = {
     if (["pptx","pptm","ppt"].includes(ext)) return "ms-powerpoint";
     return null;
   }
+  // Adressen med %-koder afkodet. decodeURI lader %23 (#) og andre reserverede tegn være kodet,
+  // da et # ellers ville afslutte adressen.
+  function plainUrl(u) {
+    try { return decodeURI(u); } catch (e) { return u; }
+  }
+  // Æ, ø, å og andre tegn uden for ASCII i adressen. Browseren koder dem altid som UTF-8 (å → %C3%A5)
+  // i et ms-excel:-link, og det kan Office ikke afkode ("Vi kunne ikke finde …"). Afprøvet i Edge
+  // med både UTF-8- og Windows-1252-koder (%E5) – ingen af dem virker.
+  const hasSpecialChars = u => /[^\x00-\x7F]/.test(plainUrl(u));
+  // Det program genvejen faktisk åbner i: kun når valget er slået til, og adressen kan bruges
+  const desktopApp = l => (l.desktop && !hasSpecialChars(l.url)) ? officeApp(l.url) : null;
   function hrefOf(l) {
-    const app = l.desktop ? officeApp(l.url) : null;
-    return app ? `${app}:ofe|u|${l.url}` : l.url;
+    const app = desktopApp(l);
+    if (!app) return l.url;
+    // Lokale filer: stien skrives uden %-kodning (mellemrum som de er)
+    return `${app}:ofe|u|${/^file:/i.test(l.url) ? plainUrl(l.url) : l.url}`;
   }
   const isWebHref = h => /^(https?|file):/i.test(h);
   function openHref(h) {
@@ -903,7 +920,7 @@ window.GENVEJE = {
 
   function rowEl(l) {
     const sel = UI.select, on = UI.sel.has(l.id), href = hrefOf(l), web = isWebHref(href);
-    const app = l.desktop ? officeApp(l.url) : null;
+    const app = desktopApp(l);
     return el("div", { class: "row" + (sel ? " selmode" : "") + (on ? " picked" : "") + (UI.q && !sel && firstLink === l ? " first" : ""), "data-id": l.id },
       sel ? el("span", { class: "pickbox" }, on ? "☑" : "☐") : null,
       el("a", { href, target: web ? "_blank" : null, rel: web ? "noopener" : null, title: l.url },
@@ -1042,9 +1059,40 @@ window.GENVEJE = {
       b("Fjern tag…", bulkRemoveTags),
       b("📁 Flyt til kategori…", bulkMove),
       b(allFav ? "☆ Fjern favorit" : "★ Gør til favorit", bulkFav),
+      b("↗ Åbn i program…", bulkDesktop),
       b("🗑 Slet…", bulkDelete, "btn danger"),
       el("span", { class: "spacer" }),
       b("Færdig", exitSelect, "btn", false));
+  }
+
+  // Slå "Åbn i Excel/Word/PowerPoint" til eller fra for de markerede Office-filer
+  function bulkDesktop() {
+    const ls = selectedLinks(), allOffice = ls.filter(l => officeApp(l.url));
+    const office = allOffice.filter(l => !hasSpecialChars(l.url)), special = allOffice.length - office.length;
+    const other = ls.length - allOffice.length;
+    if (!office.length) {
+      toast(special ? "De valgte Office-filer har æ, ø eller å i navnet eller stien og kan ikke åbnes i programmet via et link"
+                    : "Ingen af de valgte genveje er Excel-, Word- eller PowerPoint-filer", 6000);
+      return;
+    }
+    const on = office.filter(l => l.desktop).length;
+    const apply = to => d => {
+      office.forEach(l => { if (to) l.desktop = true; else delete l.desktop; });
+      persist(); d.close(); render();
+      toast(`${plural(office.length, "Office-fil", "Office-filer")} ${to ? "åbnes nu i programmet" : "åbnes nu som almindeligt link"}`);
+    };
+    const d = modal(`Åbn i program – ${plural(office.length, "Office-fil", "Office-filer")}`, [
+      el("p", {}, `${office.length - on} af ${office.length} åbnes i dag i browseren eller hentes som en kopi; ${on} åbnes allerede i Excel, Word eller PowerPoint.`),
+      other ? el("small", {}, `${plural(other, "valgt genvej", "valgte genveje")} er ikke Office-filer og bliver ikke ændret.`) : null,
+      special ? el("small", {}, `${plural(special, "Office-fil", "Office-filer")} har æ, ø eller å i navnet eller stien. Dem kan programmet ikke finde via et link, så de bliver ikke ændret.`) : null,
+      el("small", {}, "Virker med lokale filer, netværksdrev og direkte SharePoint/OneDrive-adresser til filen.")
+    ], [
+      cancelBtn(),
+      el("span", { class: "spacer" }),
+      el("button", { type: "button", class: "btn", disabled: on === 0, onClick: e => apply(false)(e.target.closest("dialog")) }, "Slå fra"),
+      el("button", { type: "submit", class: "btn primary", disabled: on === office.length }, "Åbn i programmet")
+    ], { onSubmit: dd => apply(true)(dd) });
+    return d;
   }
 
   function bulkAddTags() {
@@ -1302,10 +1350,18 @@ window.GENVEJE = {
   $("emojis").replaceChildren(...EMOJIS.map(e => el("button", { type: "button", title: "Brug " + e }, e)));
   $("emojis").addEventListener("click", e => { const b = e.target.closest("button"); if (b) $("fIcon").value = b.textContent; });
 
+  // deskTouched: brugeren har selv sat/fjernet fluebenet, så det ændres ikke automatisk
+  let deskTouched = false;
+  $("fDesk").addEventListener("change", () => { deskTouched = true; });
   function updateDesk() {
-    const app = officeApp(normalizeUrl($("fUrl").value));
+    const url = normalizeUrl($("fUrl").value), app = officeApp(url), special = !!app && hasSpecialChars(url);
     $("fDeskRow").hidden = !app;
     if (app) $("fDeskLabel").textContent = `Åbn i ${APPNAME[app]} i stedet for browseren`;
+    $("fDeskWarn").hidden = !special;
+    $("fDesk").disabled = special;
+    if (special) { $("fDesk").checked = false; return; }
+    // Nye lokale Office-filer åbnes som standard i programmet (Edge henter ellers en kopi)
+    if (!editId && !deskTouched) $("fDesk").checked = !!app && /^file:/i.test(url);
   }
 
   function openLinkDialog(id, preset = {}) {
@@ -1319,6 +1375,7 @@ window.GENVEJE = {
     $("fNote").value = cur.note || "";
     $("fFav").checked = !!cur.favorite;
     $("fDesk").checked = !!cur.desktop;
+    deskTouched = !!id;
     fillCatSelect($("fCat"), cur.category);
     updateTagList();
     tagBox = tagInput(cur.tags || []);
@@ -1357,7 +1414,7 @@ window.GENVEJE = {
     if (tags.length) item.tags = tags;
     if (note) item.note = note;
     if ($("fFav").checked) item.favorite = true;
-    if ($("fDesk").checked && officeApp(url)) item.desktop = true;
+    if ($("fDesk").checked && officeApp(url) && !hasSpecialChars(url)) item.desktop = true;
 
     if (editId) {
       const i = D.links.findIndex(l => l.id === editId);
@@ -1413,6 +1470,7 @@ window.GENVEJE = {
     updateTagList();
     fdTags = tagInput([]);
     $("fdTagsBox").replaceChildren(fdTags);
+    $("fdDesk").checked = true;
     updateFdAdd();
     fdlg.showModal();
     $("fdPick").focus();
@@ -1547,6 +1605,7 @@ window.GENVEJE = {
       if (existing.has(url)) return;
       const item = { id: "l-" + uid(), name: f.dir ? f.name : (f.name.replace(/\.[^.]+$/, "") || f.name), url, category: cat, icon: f.dir ? "📂" : guessIcon(url) };
       if (tags.length) item.tags = tags.slice();
+      if (!f.dir && $("fdDesk").checked && officeApp(url) && !hasSpecialChars(url)) item.desktop = true;
       D.links.push(item);
       existing.add(url);
       f.dir ? nDirs++ : nFiles++;
@@ -1758,7 +1817,7 @@ window.GENVEJE = {
             el("div", { class: "fcheck" }, "☑ Favorit", co(4)),
             el("div", { class: "btns" }, el("span", { class: "spacer" }), demoBtn("Annuller"), demoBtn("Gem", "btn primary")))),
         legend([
-          "Adressen. Indsætter du en Windows-sti som C:\\Users\\…\\fil.xlsx (også med anførselstegn), laver siden den selv om til et rigtigt fillink.",
+          "Adressen. Indsætter du en Windows-sti som C:\\Users\\…\\fil.xlsx (også med anførselstegn), laver siden den selv om til et rigtigt fillink. Er det en Excel-, Word- eller PowerPoint-fil, sættes “Åbn i Excel” automatisk til – se afsnit 10.",
           "Kategorien. Nederst i listen ligger “+ Ny kategori…”, så du kan oprette en ny uden at lukke dialogen.",
           "Tags – tryk Enter eller komma efter hvert tag. Se Tags og filtre.",
           "Favorit – genvejen kommer også med under ⭐ Favoritter."
@@ -1809,6 +1868,7 @@ window.GENVEJE = {
           "Undermapper kommer med – både som mapper du kan tilføje, og med filerne i dem.",
           "Tomme mapper vises ikke. Browseren lister kun filer, så siden finder mapperne gennem filerne i dem.",
           "Office-låsefiler (~$…), skjulte filer, desktop.ini og Thumbs.db springes over.",
+          "Excel-, Word- og PowerPoint-filer sættes som standard til at åbne i programmet (afsnit 10). Fjern fluebenet nederst i dialogen, hvis du ikke vil det.",
           "Stien huskes efter mappens navn. Har du to forskellige mapper med samme navn, foreslås den sidst brugte sti – tjek den.",
           "Meget store mapper (især på netværksdrev) kan tage et øjeblik at indlæse."
         ]),
@@ -1909,7 +1969,7 @@ window.GENVEJE = {
             el("b", {}, "3 valgt"), demoBtn("Vælg alle viste (4)"), demoBtn("Ryd valg"), el("span", { class: "sep" }), co(1),
             demoBtn("🏷 Tilføj tag…", "btn primary"), demoBtn("Fjern tag…"), demoBtn("📁 Flyt til kategori…"), demoBtn("★ Gør til favorit"), demoBtn("🗑 Slet…", "btn danger"),
             el("span", { class: "spacer" }), demoBtn("Færdig"))),
-        legend(["Handlingerne gælder alle markerede genveje: tilføj eller fjern tags, flyt til en anden kategori, gør til (eller fjern som) favorit, eller slet."]),
+        legend(["Handlingerne gælder alle markerede genveje: tilføj eller fjern tags, flyt til en anden kategori, gør til (eller fjern som) favorit, slå “Åbn i program” til eller fra for Office-filerne (↗ Åbn i program…), eller slet."]),
         P("Er nogle af de markerede genveje skjult af et filter, står det i bjælken, så du ikke ændrer noget, du ikke kan se.")),
 
       sec("search", "9. Søgning og tastatur",
@@ -1921,14 +1981,19 @@ window.GENVEJE = {
           el("tr", {}, el("td", {}, KB("Shift"), " + klik"), el("td", {}, "Under ☑ Markér: markér alt mellem to genveje")))),
 
       sec("office", "10. Åbn Office-filer i skrivebordsprogrammet",
-        P("Normalt åbner SharePoint- og OneDrive-filer i browseren. Er adressen den direkte adresse til en Office-fil, kan genvejen i stedet åbne filen i Excel, Word eller PowerPoint på din pc – så du redigerer den rigtige fil."),
+        P("En genvej til en Excel-, Word- eller PowerPoint-fil kan åbne filen direkte i programmet på din pc – så du arbejder i den rigtige fil. Det virker både med filer på din pc, på netværksdrev og på SharePoint/OneDrive."),
         UL([
-          "Valget “Åbn i Excel i stedet for browseren” dukker op i dialogen, når adressen starter med https:// og ender på et Office-filnavn (.xlsx, .xlsm, .xlsb, .xls, .csv, .docx, .docm, .doc, .pptx, .pptm, .ppt).",
+          [B("Lokale filer og netværksdrev"), ": uden valget henter Edge en kopi af filen til Overførsler. Med valget åbner Excel den oprindelige fil. Derfor er det slået til som standard, når du tilføjer en lokal Office-fil."],
+          [B("SharePoint og OneDrive"), ": uden valget åbner filen i browseren (eller hentes). Med valget åbner den i programmet."],
+          "Valget “Åbn i Excel i stedet for browseren” dukker op i dialogen, når adressen ender på et Office-filnavn (.xlsx, .xlsm, .xlsb, .xls, .csv, .docx, .docm, .doc, .pptx, .pptm, .ppt).",
+          ["Har du mange genveje, så slå det til for dem alle på én gang: ", B("☑ Markér"), " → ", B("↗ Åbn i program…"), "."],
           "Delingslinks uden filnavn i adressen (fx …/:x:/g/…) giver ikke valget. Brug den direkte adresse, der ender på filnavnet.",
+          [B("Ikke med æ, ø og å"), ": har filnavnet eller en mappe i stien æ, ø, å eller et andet særligt bogstav, kan programmet ikke finde filen via et link fra browseren. Valget kan da ikke slås til, og genvejen åbner som et almindeligt link. Omdøb filen eller mappen, hvis den skal åbne i programmet."],
           "Genveje der åbner i et program, er mærket med fx “↗ Excel”.",
           "Første gang spørger browseren, om den må åbne programmet. Office skal være installeret på pc'en.",
           "Afprøv linket én gang, når du har lavet det."
         ]),
+        tip(B("Åbner filen skrivebeskyttet? "), "Så tjek, om den også gør det, når du åbner den fra Stifinder. Gør den det, ligger årsagen i filen eller mappen – fx at filen er markeret som skrivebeskyttet (højreklik → Egenskaber), er gemt som “Åbn altid skrivebeskyttet”, eller at du ikke har skriveadgang til mappen."),
         shot("En genvej, der åbner i Excel.",
           demoCard("📁", "SharePoint", C3, [demoRow("📗", "WEEE 2026", "contoso.sharepoint.com/sites/Genbrug/Shared Documents/WEEE 2026.xlsx", { badge: "↗ Excel", co: co(1) })])),
         legend(["Mærket viser, at linket åbner filen i Excel i stedet for i browseren."])),
@@ -1938,9 +2003,10 @@ window.GENVEJE = {
         UL([
           [B("PDF, billeder og tekstfiler"), " åbner i en browserfane."],
           [B("Mapper"), " viser en simpel filoversigt i browserfanen – ikke Stifinder. Derfra kan du klikke videre."],
-          [B("Excel, Word, PowerPoint og andre filer"), " åbner browseren ikke i programmet. Edge henter typisk en kopi til mappen Overførsler, og Firefox spørger, om filen skal åbnes eller gemmes."]
+          [B("Excel, Word og PowerPoint"), " åbner i programmet, når genvejen har “Åbn i Excel/Word/PowerPoint” slået til (afsnit 10). Det er standard for lokale Office-filer, du tilføjer."],
+          [B("Andre filer"), " – og Office-filer uden valget – åbner browseren ikke i programmet. Edge henter en kopi til mappen Overførsler. Firefox giver i stedet filen videre til det program, Windows har tilknyttet filtypen."]
         ]),
-        warnbox(B("Pas på med kopier: "), "åbner du en Office-fil via et lokalt fillink, arbejder du typisk i en kopi i Overførsler. Det, du retter i kopien, kommer ikke med i den oprindelige fil. Til filer du redigerer, er det sikrest at have dem på SharePoint/OneDrive og bruge “Åbn i Excel” (afsnit 10)."),
+        warnbox(B("Pas på med kopier: "), "åbner du en Office-fil via et almindeligt fillink i Edge, arbejder du i en kopi i Overførsler. Det, du retter i kopien, kommer ikke med i den oprindelige fil. Slå “Åbn i Excel” til for genvejen – så åbner Excel den rigtige fil. Excel viser filens placering under Filer → Oplysninger."),
         P("Netværksdrev følger de samme regler, men firmaets netværk og browserindstillinger kan blokere dem. Afprøv ét link, før du tilføjer mange.")),
 
       sec("save", "12. Gem, backup og nye versioner",
@@ -1982,7 +2048,9 @@ window.GENVEJE = {
           el("dt", {}, "Et link til en lokal fil eller et netværksdrev åbner ikke"),
           el("dd", {}, "Tjek at stien stadig passer (er filen flyttet eller omdøbt?), og at netværksdrevet er tilgængeligt. Firmaets browserindstillinger kan også blokere fillinks."),
           el("dt", {}, "“Åbn i Excel” virker ikke"),
-          el("dd", {}, "Tjek at adressen er den direkte adresse til filen (ender på fx .xlsx), at Office er installeret, og at du har sagt ja, da browseren spurgte om at åbne programmet."),
+          el("dd", {}, "Tjek at adressen er den direkte adresse til filen (ender på fx .xlsx), at filen stadig ligger der, at Office er installeret, og at du har sagt ja, da browseren spurgte om at åbne programmet. Siger Excel, at filen ikke kan findes, så tjek stien under ✎. Har filnavnet eller mappestien æ, ø eller å, virker valget ikke – se afsnit 10."),
+          el("dt", {}, "Filen åbner skrivebeskyttet"),
+          el("dd", {}, "Åbn den fra Stifinder. Er den også skrivebeskyttet der, er det filen eller mappen: filen er markeret som skrivebeskyttet, gemt som “Åbn altid skrivebeskyttet”, åben et andet sted, eller du mangler skriveadgang til mappen."),
           el("dt", {}, "Siden viser en fejl om genvejslisten"),
           el("dd", {}, "De indbyggede data i filen er beskadiget – fx efter at være redigeret i hånden. Tryk F12 → Konsol for at se hvor. Du kan stadig importere en backup."))),
 

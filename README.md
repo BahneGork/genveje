@@ -13,7 +13,7 @@ Det er **én HTML-fil** uden installation, server eller hjælpefiler. Dobbeltkli
 - Favoritter, søgning (`/`, `Enter` åbner første resultat) og lyst/mørkt tema.
 - **Tilføj fra mappe**: vælg en mappe og sæt flueben ved de filer og undermapper, du vil have med. Mappens sti huskes.
 - **Markér flere**: tilføj eller fjern tags, flyt til kategori, gør til favorit eller slet mange genveje på én gang.
-- Office-filer på SharePoint/OneDrive kan åbnes direkte i Excel, Word eller PowerPoint (`ms-excel:ofe|u|…`).
+- Office-filer kan åbnes direkte i Excel, Word eller PowerPoint (`ms-excel:ofe|u|…`) – både på SharePoint/OneDrive og lokalt eller på netværksdrev. For lokale filer er det slået til som standard, så Edge ikke henter en kopi. Virker ikke, når fil- eller mappenavnet indeholder æ, ø eller å.
 - Træk et link fra browserens adresselinje ind på siden for at tilføje det.
 - Indbygget **📖 Vejledning** med illustrationer.
 
@@ -44,7 +44,7 @@ Siden kører i browseren uden installation. Derfor kan den ikke:
 - skrive i sin egen fil. Brug i stedet *Gem kopi af siden*.
 - tjekke, om en fil stadig findes.
 
-Lokale Office-filer, der åbnes via et fillink, bliver typisk hentet som en kopi. Ændringer i kopien kommer ikke med i originalen.
+Lokale Office-filer, der åbnes via et almindeligt fillink i Edge, bliver hentet som en kopi. Ændringer i kopien kommer ikke med i originalen. Brug "Åbn i Excel/Word/PowerPoint" (standard for nye lokale Office-filer).
 
 ## Udvikling
 
