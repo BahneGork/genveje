@@ -575,7 +575,14 @@ window.GENVEJE = {
   }
   function hrefOf(l) {
     const app = l.desktop ? officeApp(l.url) : null;
-    return app ? `${app}:ofe|u|${l.url}` : l.url;
+    if (!app) return l.url;
+    // Lokale filer: Excel finder ikke filen, hvis stien er %-kodet (mellemrum som %20, æøå osv.),
+    // så stien skrives som den står. decodeURI lader %23 (#) og andre reserverede tegn være kodet,
+    // da et # ellers ville afslutte adressen.
+    return `${app}:ofe|u|${/^file:/i.test(l.url) ? plainFileUrl(l.url) : l.url}`;
+  }
+  function plainFileUrl(u) {
+    try { return decodeURI(u); } catch (e) { return u; }
   }
   const isWebHref = h => /^(https?|file):/i.test(h);
   function openHref(h) {
