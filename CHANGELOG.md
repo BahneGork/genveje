@@ -1,5 +1,13 @@
 # Ændringslog
 
+## 2.4
+
+- **Lokale Office-filer kan åbnes i programmet.** "Åbn i Excel/Word/PowerPoint" virker nu også for filer på pc'en og netværksdrev, ikke kun for SharePoint/OneDrive. Linket bliver `ms-excel:ofe|u|file:///…`, og Excel åbner den oprindelige fil. Uden valget henter Edge en kopi til Overførsler.
+- Valget er slået til som standard, når en ny lokal Excel-, Word- eller PowerPoint-fil tilføjes – både i *Tilføj genvej* og i *Tilføj fra mappe* (fluebenet nederst i mappedialogen). Fjerner man fluebenet i dialogen, sættes det ikke igen automatisk. Eksisterende genveje ændres ikke.
+- Ny handling under **☑ Markér**: **↗ Åbn i program…** slår valget til eller fra for alle markerede Office-filer. Andre genveje ændres ikke.
+- Vejledningen (afsnit 2, 3, 8, 10, 11 og 13) er opdateret, bl.a. med hjælp til filer, der åbner skrivebeskyttet.
+- Afprøvet med Excel og en lokal fil i Edge. Word, PowerPoint og netværksdrev bruger samme linkform, men er ikke afprøvet i en rigtig browser.
+
 ## 2.3
 
 - Kategorikortene på oversigten viser højst 6 genveje. Har en kategori flere, åbner **Vis alle** kategorien.

@@ -28,9 +28,10 @@ Siden skal kunne bruges på en arbejds-pc uden installation og uden administrato
 - **Fuld sti til filer og mapper**: browsere giver aldrig en webside den fulde sti. Det gælder både filvælger, mappevælger (`webkitdirectory`) og træk-og-slip. Mappedialogen får kun stier *inden i* den valgte mappe (`webkitRelativePath`), og derfor indsætter brugeren mappens sti én gang. Ved træk-og-slip fra Stifinder bruger siden en `file://`-adresse, hvis browseren sender en med. Edge gør ikke, og Firefox er ikke afprøvet.
 - **Tomme mapper** vises ikke i mappedialogen, fordi mapper kun kan findes via filerne i dem.
 - **Mappedialogens startplacering** kan ikke styres af siden.
-- **Stifinder og programmer** kan ikke startes fra en webside uden en hjælper (registreringsdatabase, script eller app). Office er undtagelsen via URI-skemaerne `ms-excel:ofe|u|<https-adresse>` (og `ms-word:`, `ms-powerpoint:`). De virker kun med en http(s)-adresse, ikke med lokale filer.
-- **Lokale fillinks** fra en lokal side virker. PDF, billeder og tekst åbner i browseren, og mapper vises som en filoversigt. Office-filer hentes typisk som en kopi, så ændringer ikke kommer med i originalen.
-- **Lokale filer i Excel** fra en browserside er ikke fundet mulige uden en hjælper.
+- **Stifinder og programmer** kan ikke startes fra en webside uden en hjælper (registreringsdatabase, script eller app). Office er undtagelsen via URI-skemaerne `ms-excel:ofe|u|<adresse>` (og `ms-word:`, `ms-powerpoint:`).
+- **Office-links med lokale filer**: Microsofts specifikation dokumenterer kun http(s)-adresser i `ofe|u|`. Afprøvet i Edge (oktober 2026): `ms-excel:ofe|u|file:///C:/…` med %-kodet sti åbner den oprindelige lokale fil i Excel. Varianterne med Windows-stien direkte (`ofe|u|C:\…`), uden %-kodning, med skråstreger frem og den korte form `ms-excel:C:\…` virkede ikke. Netværksdrev (`file://///server/…`), Word og PowerPoint er ikke afprøvet i en rigtig browser. Fra 2.4 bruger Genveje denne form for lokale Office-filer.
+- **Lokale fillinks** fra en lokal side virker. PDF, billeder og tekst åbner i browseren, og mapper vises som en filoversigt. Office-filer via et almindeligt fillink: Edge henter en kopi til Overførsler, så ændringer ikke kommer med i originalen; Firefox giver filen videre til det tilknyttede program.
+- **Skrivebeskyttet**: en fil, der også åbner skrivebeskyttet fra Stifinder, gør det af årsager i filen eller mappen (filattribut, "Åbn altid skrivebeskyttet", manglende skriveadgang) – ikke på grund af linket.
 
 ## Illustrationer i vejledningen
 

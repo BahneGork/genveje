@@ -84,7 +84,7 @@ const blobText = b => b.text();
   ok($(w, "#fUrl").value === "file:///C:/Users/Michael/Rapporter/Budget%202026.xlsx", "sti konverteres: " + $(w, "#fUrl").value);
   ok($(w, "#fName").value === "Budget 2026", "navn gættes");
   ok($(w, "#fIcon").value === "📗", "ikon gættes");
-  ok($(w, "#fDeskRow").hidden, "skrivebordsvalg skjult for lokal fil");
+  ok(!$(w, "#fDeskRow").hidden && $(w, "#fDesk").checked, "lokal Excel-fil: “Åbn i Excel” vises og er slået til");
   const ti = $(w, "#fTagsBox input");
   ti.value = "rapportering"; key(w, ti, "Enter");
   ti.value = "Økonomi, budget"; key(w, ti, "Enter");
@@ -95,6 +95,7 @@ const blobText = b => b.text();
   let st = state(w);
   const nl = st.links.find(l => l.name === "Budget 2026");
   ok(nl && nl.category === "c-power" && nl.tags.length === 3, "genvejen er gemt med kategori og tags");
+  ok(nl.desktop === true && $$(w, "#grid .row a").some(a => a.getAttribute("href") === "ms-excel:ofe|u|file:///C:/Users/Michael/Rapporter/Budget%202026.xlsx"), "lokal Excel-fil åbner via ms-excel:ofe|u|file:///…");
   ok($$(w, "#tagRow [data-tag]").length === 4, "tag-rækken har nu 4 tags");
   const rapChip = $(w, '#tagRow [data-tag="rapportering"] .ct');
   ok(rapChip && rapChip.textContent === "2", "Rapportering tælles 2");
@@ -320,6 +321,56 @@ const blobText = b => b.text();
   click(w8, $(w8, '#extRow [data-ext=".pdf"]'));
   click(w8, $(w8, '#tagRow [data-clear]'));
   ok(ids8() === "abdec" && !$(w8, "#extRow .chip.on"), "Ryd filtre nulstiller også endelsen");
+
+  console.log("18. Lokale Office-filer åbnes i programmet");
+  const st18 = { version: 2, categories: [{ id: "c1", name: "Filer", icon: "📁", color: "#0078d4" }], tagColors: {}, links: [
+    { id: "x1", name: "Gammel", url: "file:///C:/Data/gammel.xlsx", category: "c1" },
+    { id: "x2", name: "Notat", url: "file:///C:/Data/notat.docx", category: "c1", desktop: true },
+    { id: "x3", name: "Manual", url: "file:///C:/Data/manual.pdf", category: "c1" },
+    { id: "x4", name: "Web", url: "https://example.com/", category: "c1" }
+  ] };
+  let w9 = load({ "genveje.state": JSON.stringify(st18) }).window;
+  const st9 = () => JSON.parse(w9.localStorage.getItem("genveje.state"));
+  const setUrl = v => { $(w9, "#fUrl").value = v; $(w9, "#fUrl").dispatchEvent(new w9.Event("change")); };
+  click(w9, $(w9, "#addBtn"));
+  setUrl("C:\\Data\\manual2.pdf");
+  ok($(w9, "#fDeskRow").hidden && !$(w9, "#fDesk").checked, "PDF: valget vises ikke");
+  $(w9, "#fName").value = ""; $(w9, "#fIcon").value = "";
+  setUrl("\\\\srv\\share\\WEEE\\rapport.docx");
+  ok(!$(w9, "#fDeskRow").hidden && $(w9, "#fDesk").checked && $(w9, "#fDeskLabel").textContent.includes("Word"), "netværksdrev .docx: “Åbn i Word” slået til");
+  submit(w9, $(w9, "#form"));
+  ok($$(w9, "#grid .row a").some(a => a.getAttribute("href") === "ms-word:ofe|u|file://///srv/share/WEEE/rapport.docx"), "netværksdrev: ms-word:ofe|u|file://///srv/…");
+  click(w9, $(w9, "#addBtn"));
+  setUrl("C:\\Data\\budget.xlsx");
+  $(w9, "#fDesk").checked = false; $(w9, "#fDesk").dispatchEvent(new w9.Event("change"));
+  setUrl("C:\\Data\\budget2.xlsx");
+  ok(!$(w9, "#fDesk").checked, "fravalgt flueben bliver ikke sat igen automatisk");
+  submit(w9, $(w9, "#form"));
+  ok(!st9().links.find(l => l.name === "budget").desktop, "gemt uden “Åbn i Excel”, når det er fravalgt");
+  click(w9, $(w9, '#grid [data-edit="x1"]'));
+  ok(!$(w9, "#fDeskRow").hidden && !$(w9, "#fDesk").checked, "redigering: eksisterende genvej uden valget forbliver uden");
+  setUrl("C:\\Data\\gammel2.xlsx");
+  ok(!$(w9, "#fDesk").checked, "redigering: ny sti sætter ikke valget automatisk");
+  $(w9, "#dlg").close();
+  click(w9, $(w9, "#selBtn"));
+  ["x1", "x2", "x3", "x4"].forEach(id => click(w9, $(w9, `#grid .row[data-id="${id}"]`)));
+  click(w9, [...$$(w9, "#selbar button")].find(b => b.textContent.includes("Åbn i program")));
+  let d9 = $$(w9, "dialog").find(x => x.open && x.id === "");
+  ok(d9 && d9.textContent.includes("1 af 2") && d9.textContent.includes("2 valgte genveje er ikke Office-filer"), "samlet: viser antal og hvad der ikke ændres");
+  submit(w9, d9.querySelector("form"));
+  let L9 = st9().links;
+  ok(L9.find(l => l.id === "x1").desktop && L9.find(l => l.id === "x2").desktop && !L9.find(l => l.id === "x3").desktop && !L9.find(l => l.id === "x4").desktop, "samlet: slået til for Office-filerne, ikke for PDF og weblink");
+  click(w9, [...$$(w9, "#selbar button")].find(b => b.textContent.includes("Åbn i program")));
+  d9 = $$(w9, "dialog").find(x => x.open && x.id === "");
+  click(w9, [...d9.querySelectorAll("button")].find(b => b.textContent === "Slå fra"));
+  L9 = st9().links;
+  ok(!L9.find(l => l.id === "x1").desktop && !L9.find(l => l.id === "x2").desktop, "samlet: kan slås fra igen");
+  {
+    click(w9, [...$$(w9, "#selbar button")].find(b => b.textContent.startsWith("Ryd valg")));
+    click(w9, $(w9, '#grid .row[data-id="x3"]'));
+    click(w9, [...$$(w9, "#selbar button")].find(b => b.textContent.includes("Åbn i program")));
+    ok(!$$(w9, "dialog").some(x => x.open && x.id === ""), "samlet: ingen dialog når der ikke er Office-filer");
+  }
 
   console.log(failures ? `\n${failures} FEJL` : "\nAlle test bestået");
   process.exit(failures ? 1 : 0);
